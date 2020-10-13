@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SWE1-MCTG", "SWE1-MCTG\SWE1-MCTG.csproj", "{DFFC3FEE-85F1-4B0F-BD9B-07051E8EC384}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DFFC3FEE-85F1-4B0F-BD9B-07051E8EC384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFFC3FEE-85F1-4B0F-BD9B-07051E8EC384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFFC3FEE-85F1-4B0F-BD9B-07051E8EC384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFFC3FEE-85F1-4B0F-BD9B-07051E8EC384}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E56C2C60-0467-452C-9E2F-F15A634B2619}
+	EndGlobalSection
+EndGlobal
