@@ -52,6 +52,8 @@
   <ItemGroup>
     <Compile Include="ACard.cs" />
     <Compile Include="ACardTest.cs" />
+    <Compile Include="Monster.cs" />
+    <Compile Include="MonsterTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
