@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MCTG
 {
-    class Spell : ICard
+    public class Spell : ICard
     {
         private string _id;
         private string _name;

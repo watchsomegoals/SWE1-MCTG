@@ -50,10 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ACardTest.cs" />
     <Compile Include="ICard.cs" />
     <Compile Include="Monster.cs" />
-    <Compile Include="MonsterTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Spell.cs" />

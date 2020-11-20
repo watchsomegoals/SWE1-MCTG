@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MCTG
 {
-    class Monster : ICard
+    public class Monster : ICard
     {
         private string _id;
         private string _name;

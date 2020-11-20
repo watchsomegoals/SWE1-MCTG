@@ -15,7 +15,6 @@ public enum CardType
     monster = 1,
     spell
 }
-
 public enum MonsterType
 {
     def = 0,
@@ -30,7 +29,7 @@ public enum MonsterType
 
 namespace MCTG
 {
-    interface ICard
+    public interface ICard
     {
         string Id { get; set; }
         string Name { get; set; }
