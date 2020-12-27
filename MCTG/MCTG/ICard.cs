@@ -15,7 +15,6 @@ public enum CardType
     monster = 1,
     spell
 }
-
 public enum MonsterType
 {
     def = 0,
@@ -30,18 +29,18 @@ public enum MonsterType
 
 namespace MCTG
 {
-    interface ICard
+    public interface ICard
     {
         string Id { get; set; }
         string Name { get; set; }
-        float Damage { get; set; }
+        double Damage { get; set; }
         ElementType ElementType { get; set; }
         CardType CardType { get; set; }
         MonsterType MonsterType { get; set; }
         bool IsDead { get; set; }
         //return 0 if can't attack, 1 if attacker was successful, -1 if attacker wasn't successful
         int Attack(ICard defender);
-        float DoubleDamage();
-        float HalveDamage();
+        double DoubleDamage();
+        double HalveDamage();
     }
 }
