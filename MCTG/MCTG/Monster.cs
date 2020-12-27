@@ -10,13 +10,13 @@ namespace MCTG
     {
         private string _id;
         private string _name;
-        private float _damage;
+        private double _damage;
         private ElementType _elementType;
         private CardType _cardType;
         private bool _isDead;
         private MonsterType _monsterType;
 
-        public Monster(string id, string name, float damage, ElementType elementType, MonsterType monsterType)
+        public Monster(string id, string name, double damage, ElementType elementType, MonsterType monsterType)
         {
             _id = id;
             _name = name;
@@ -26,12 +26,12 @@ namespace MCTG
             _cardType = CardType.monster;
             _isDead = false;
         }
-        public float DoubleDamage() => 2 * Damage;
-        public float HalveDamage() => Damage / 2;
+        public double DoubleDamage() => 2 * Damage;
+        public double HalveDamage() => Damage / 2;
         public int Attack (ICard defender)
         {
-            float damageValueAttacker = 0;
-            float damageValueDefender = defender.Damage;
+            double damageValueAttacker = 0;
+            double damageValueDefender = defender.Damage;
 
             if (defender.CardType == CardType.spell)
             {
@@ -129,7 +129,7 @@ namespace MCTG
             get => _name;
             set => _name = value;
         }
-        public float Damage
+        public double Damage
         {
             get => _damage;
             set => _damage = value;
