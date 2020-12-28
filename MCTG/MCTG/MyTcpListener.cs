@@ -7,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Xml.Schema;
+using System.Threading;
 
 namespace MCTG
 {
@@ -14,65 +15,34 @@ namespace MCTG
     {
         public static void Main()
         {
-            RequestContext context = new RequestContext();
             TcpListener server = null;
+            TcpClient client = default(TcpClient);
+            
+            Int32 port = 13000;
+            IPAddress localAddr = IPAddress.Parse("127.0.0.1");
+
+            server = new TcpListener(localAddr, port);
             try
             {
-                // Set the TcpListener on port 13000.
-                Int32 port = 13000;
-                IPAddress localAddr = IPAddress.Parse("127.0.0.1");
-
-                // TcpListener server = new TcpListener(port);
-                server = new TcpListener(localAddr, port);
-
-                // Start listening for client requests.
                 server.Start();
 
-                // Buffer for reading data
-                byte[] bytes = new byte[256];
-                string data = null;
-
-                //Enter the listening loop.
                 while (true)
                 {
                     Console.WriteLine("Waiting for a connection... ");
 
-                    // Perform a blocking call to accept requests
-                    // You could also use server.AcceptTcpClient();
-                    TcpClient client = server.AcceptTcpClient();
+                    client = server.AcceptTcpClient();
                     Console.WriteLine("Connected!\n");
 
-                    data = null;
+                    ClientHandler clientHandler = new ClientHandler();
+                    clientHandler.startClient(client);
 
-                    //Get a stream object for reading and writing
-                    NetworkStream stream = client.GetStream();
-
-                    int i;
-
-                    // Loop to receive all the data sent by the client.
-                    while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
-                    {
-                        //Translate data bytes to a ASCII string.
-                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        context.ReadContext(data);
-                        context.HandleRequest();
-
-                        data = context.ComposeResponse();
-                        Console.WriteLine(data);
-
-                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-
-                        //Send back a response.
-                        stream.Write(msg, 0, msg.Length);
-
-                        if (!stream.DataAvailable)
-                        {
-                            break;
-                        }
-                    }
-                    // Shutdown and end connection
-                    client.Close();
                 }
+
+                //client.Close();
+                //server.Stop();
+
+                //Console.WriteLine("\nHit enter to continue...");
+                //Console.Read();
             }
             catch (SocketException e)
             {
@@ -80,12 +50,60 @@ namespace MCTG
             }
             finally
             {
+                client.Close();
                 // Stop listening for new clients.
                 server.Stop();
             }
-
             Console.WriteLine("\nHit enter to continue...");
             Console.Read();
+        }
+    }
+
+    public class ClientHandler
+    {
+        TcpClient _client;
+        public void startClient(TcpClient client)
+        {
+            _client = client;
+            Thread t = new Thread(exchangeMessages);
+            t.Start();
+            
+        }
+        public void exchangeMessages()
+        {
+            RequestContext context = new RequestContext();
+            NetworkStream stream = _client.GetStream();
+            Console.WriteLine("waiting to sleep");
+            Thread.Sleep(20000);
+
+            byte[] bytes = new byte[256];
+            string data = null;
+            int i;
+            while (true)
+            {
+                while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
+                {
+                    //Translate data bytes to a ASCII string.
+                    data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+
+                    context.ReadContext(data);
+                    context.HandleRequest();
+
+                    data = context.ComposeResponse();
+                    Console.WriteLine(data);
+
+                    byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+
+                    //Send back a response.
+                    stream.Write(msg, 0, msg.Length);
+
+                    if (!stream.DataAvailable)
+                    {
+                        break;
+                    }
+                }
+            }
+
         }
     }
 }
