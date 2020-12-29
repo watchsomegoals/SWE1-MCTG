@@ -14,6 +14,7 @@ namespace DatabaseManager
     {
         static void Main(string[] args)
         {
+            /*
             ConnectionDatabase mycon = new ConnectionDatabase();
             string user = "caraba";
             string pw = "password";
@@ -21,6 +22,12 @@ namespace DatabaseManager
             {
                 Console.WriteLine("User exists already!");
             }
+            Console.ReadLine();
+            */
+            ConnectionDatabase mycon = new ConnectionDatabase();
+            string user = "kienboec";
+            string pw = "daniel";
+            Console.WriteLine(mycon.LogInUser(user, pw));
             Console.ReadLine();
         }
     }

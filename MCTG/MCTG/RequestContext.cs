@@ -135,34 +135,17 @@ namespace MCTG
                 }
                 else if (string.Compare(dirName, "users") == 0)
                 {
-                    //JObject jobj = JObject.Parse(payload);
-                    User user = JsonConvert.DeserializeObject<User>(payload);
-                    DatabaseManager mycon = new DatabaseManager();
-                    if(mycon.InsertUser(user.Username, user.Password))
-                    {
-                        statusCode = "200";
-                        reasonPhrase = "OK";
-                        responseBody = "\nUser created\n";
-                    }
-                    else
-                    {
-                        statusCode = "403";
-                        reasonPhrase = "Forbidden";
-                        responseBody = "\nUser already exists\n";
-                    }
+                    RegisteringUser();
                 }
                 else if (string.Compare(dirName, "sessions") == 0)
                 {
-
+                    LoggingUser();
                 }
                 else
                 {
                     statusCode = "404";
                     reasonPhrase = "Not Found";
                     responseBody = "\nNot Found, wrong ressource name\n";
-                    //Post();
-                    //statusCode = "200";
-                    //reasonPhrase = "OK";
                 }
             }
             else if (string.Compare(httpVerb, "GET") == 0)
@@ -221,6 +204,51 @@ namespace MCTG
                 }
             }
         }
+
+        private void LoggingUser()
+        {
+            User user = JsonConvert.DeserializeObject<User>(payload);
+            DatabaseManager mycon = new DatabaseManager();
+            int result = mycon.LogInUser(user.Username, user.Password);
+            if (result == 0)
+            {
+                statusCode = "404";
+                reasonPhrase = "Not Found";
+                responseBody = "\nInvalid credentials\n";
+            }
+            else if (result == 1)
+            {
+                statusCode = "403";
+                reasonPhrase = "Forbidden";
+                responseBody = "\nAlready logged in\n";
+            }
+            else if (result == 2)
+            {
+                statusCode = "200";
+                reasonPhrase = "OK";
+                responseBody = "\nSuccessfully logged in\n";
+            }
+        }
+
+        private void RegisteringUser()
+        {
+            User user = JsonConvert.DeserializeObject<User>(payload);
+            DatabaseManager mycon = new DatabaseManager();
+            if (mycon.InsertUser(user.Username, user.Password))
+            {
+                statusCode = "200";
+                reasonPhrase = "OK";
+                responseBody = "\nUser created\n";
+            }
+            else
+            {
+                statusCode = "403";
+                reasonPhrase = "Forbidden";
+                responseBody = "\nUser already exists\n";
+            }
+        }
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
         public void Delete()
         {
