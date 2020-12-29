@@ -141,6 +141,11 @@ namespace MCTG
                 {
                     LoggingUser();
                 }
+                else if (string.Compare(dirName, "packages") == 0)
+                {
+                    CreatingPackages();
+
+                }
                 else
                 {
                     statusCode = "404";
@@ -202,6 +207,46 @@ namespace MCTG
                 {
                     Delete();
                 }
+            }
+        }
+
+        private void CreatingPackages()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            int check = mycon.CheckUserForInsertPackage(headerData.ElementAt(4).Value);
+            if (check == 0)
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nOnly admin can create packages\n";
+            }
+            else if (check == 1)
+            {
+                statusCode = "404";
+                reasonPhrase = "Not Found";
+                responseBody = "\nLog in as admin before creating packages\n";
+            }
+            else if (check == 2)
+            {
+                int packageid = mycon.GetPackageidForInsertPackage();
+
+                string[] cards = payload.Split(new string[] { "}," }, StringSplitOptions.None);
+                for (int i = 0; i < cards.Length; i++)
+                {
+                    if (i != cards.Length - 1)
+                    {
+                        cards[i] += "}";
+                    }
+                    cards[i] = cards[i].Replace("[", "");
+                    cards[i] = cards[i].Replace("]", "");
+                    Monster card = JsonConvert.DeserializeObject<Monster>(cards[i]);
+                    mycon.InsertCardPackage(card.Id, card.Name, card.Damage, packageid);
+                    Console.WriteLine(cards[i] + "\n");
+                }
+
+                statusCode = "200";
+                reasonPhrase = "OK";
+                responseBody = "\nPackage with id " + packageid + " created\n";
             }
         }
 
@@ -389,27 +434,7 @@ namespace MCTG
             responseBody = "\n" + fileName;
             fileName += ".txt";
             string pathFileName = Path.Combine(path, fileName);
-            CreateTextFile(pathFileName, counter, fileName, path);
-        }
-
-        public void CreateTextFile(string pathFileName, int counter, string fileName, string path)
-        {
-            if (!File.Exists(pathFileName))
-            {
-                using (StreamWriter sw = File.CreateText(pathFileName))
-                {
-                    sw.Write(this.payload);
-                }
-            }
-            else
-            {
-                counter++;
-                fileName = counter.ToString();
-                responseBody = "\n" + fileName;
-                fileName += ".txt";
-                pathFileName = Path.Combine(path, fileName);
-                CreateTextFile(pathFileName, counter, fileName, path);
-            }
+            //CreateTextFile(pathFileName, counter, fileName, path);
         }
 
         public string ComposeResponse()

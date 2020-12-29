@@ -70,7 +70,7 @@ namespace MCTG
             Console.WriteLine("waiting to sleep");
             Thread.Sleep(10000);
 
-            byte[] bytes = new byte[256];
+            byte[] bytes = new byte[1024];
             string data = null;
             int i;
             while (true)
@@ -91,6 +91,7 @@ namespace MCTG
                     //Send back a response.
                     stream.Write(msg, 0, msg.Length);
 
+                    
                     if (!stream.DataAvailable)
                     {
                         break;

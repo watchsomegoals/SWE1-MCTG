@@ -86,5 +86,76 @@ namespace DatabaseManager
             conn.Close();
             return 2;
         }
+        public int GetPackageidForInsertPackage()
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strmax = "Select max(packageid) from cards";
+            string strcount = "Select count(*) from cards";
+            NpgsqlCommand sqlmaxcmd = new NpgsqlCommand(strmax, conn);
+            NpgsqlCommand sqlcountcmd = new NpgsqlCommand(strcount, conn);
+            Int32 count = Convert.ToInt32(sqlcountcmd.ExecuteScalar());
+
+            if (count == 0)
+            {
+                conn.Close();
+                return 1;
+            }
+            else
+            {
+                Int32 packageid = Convert.ToInt32(sqlmaxcmd.ExecuteScalar());
+                conn.Close();
+                packageid++;
+                return packageid;
+            }
+        }
+        //return 0 if not admin, 1 for no active session, 2 for successful authorization 
+        public int CheckUserForInsertPackage(string token)
+        {
+            if(string.Compare(token, "Basic admin-mctgToken") != 0)
+            {
+                return 0;
+            }
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcounttoken = "Select count(*) from sessions where token = @token";
+            NpgsqlCommand sqlcountcmd = new NpgsqlCommand(strcounttoken, conn);
+            sqlcountcmd.Parameters.AddWithValue("token", token);
+            sqlcountcmd.Prepare();
+            Int32 count = Convert.ToInt32(sqlcountcmd.ExecuteScalar());
+            if (count == 0)
+            {
+                conn.Close();
+                return 1;
+            }
+            else
+            {
+                conn.Close();
+                return 2;
+            }
+        }
+        public void InsertCardPackage(string id, string name, double damage, int packageid)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcomm = "Insert into cards (cardid,name,damage,packageid) Values (@id, @name, @damage, @packageid)";
+
+            NpgsqlCommand sqlcomm = new NpgsqlCommand(strcomm, conn);
+            sqlcomm.Parameters.AddWithValue("id", id);
+            sqlcomm.Parameters.AddWithValue("name", name);
+            sqlcomm.Parameters.AddWithValue("damage", damage);
+            sqlcomm.Parameters.AddWithValue("packageid", packageid);
+
+            sqlcomm.Prepare();
+            sqlcomm.ExecuteNonQuery();
+
+            conn.Close();
+        }
     }
 }

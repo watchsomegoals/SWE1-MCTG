@@ -23,12 +23,31 @@ namespace DatabaseManager
                 Console.WriteLine("User exists already!");
             }
             Console.ReadLine();
-            */
+ 
             ConnectionDatabase mycon = new ConnectionDatabase();
             string user = "kienboec";
             string pw = "daniel";
             Console.WriteLine(mycon.LogInUser(user, pw));
             Console.ReadLine();
+            */
+
+            ConnectionDatabase mycon = new ConnectionDatabase();
+            Console.WriteLine(mycon.GetPackageidForInsertPackage());
+            Console.ReadLine();
+
+            /*
+            ConnectionDatabase mycon = new ConnectionDatabase();
+            Console.WriteLine(mycon.CheckUserForInsertPackage("Basic admin-mctgToken"));
+            Console.ReadLine();
+            
+
+            ConnectionDatabase mycon = new ConnectionDatabase();
+            string id = "firstid";
+            string name = "BlueEyesWhiteDragon";
+            double damage = 5.0;
+            int packageid = 1;
+            mycon.InsertCardPackage(id, name, damage, packageid);
+            */
         }
     }
 }
