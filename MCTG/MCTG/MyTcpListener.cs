@@ -18,7 +18,7 @@ namespace MCTG
             TcpListener server = null;
             TcpClient client = default(TcpClient);
             
-            Int32 port = 13000;
+            Int32 port = 10001;
             IPAddress localAddr = IPAddress.Parse("127.0.0.1");
 
             server = new TcpListener(localAddr, port);
@@ -37,12 +37,6 @@ namespace MCTG
                     clientHandler.startClient(client);
 
                 }
-
-                //client.Close();
-                //server.Stop();
-
-                //Console.WriteLine("\nHit enter to continue...");
-                //Console.Read();
             }
             catch (SocketException e)
             {
@@ -74,7 +68,7 @@ namespace MCTG
             RequestContext context = new RequestContext();
             NetworkStream stream = _client.GetStream();
             Console.WriteLine("waiting to sleep");
-            Thread.Sleep(20000);
+            Thread.Sleep(10000);
 
             byte[] bytes = new byte[256];
             string data = null;
@@ -103,7 +97,6 @@ namespace MCTG
                     }
                 }
             }
-
         }
     }
 }

@@ -5,6 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.IO;
+using Npgsql;
+using Npgsql.Replication.PgOutput.Messages;
+using NpgsqlTypes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MCTG
 {
@@ -128,17 +133,36 @@ namespace MCTG
                     reasonPhrase = "Bad Request";
                     responseBody = "\nBad request, no resourceID necessary\n";
                 }
-                else if (string.Compare(dirName, "messages") != 0)
+                else if (string.Compare(dirName, "users") == 0)
+                {
+                    //JObject jobj = JObject.Parse(payload);
+                    User user = JsonConvert.DeserializeObject<User>(payload);
+                    DatabaseManager mycon = new DatabaseManager();
+                    if(mycon.InsertUser(user.Username, user.Password))
+                    {
+                        statusCode = "200";
+                        reasonPhrase = "OK";
+                        responseBody = "\nUser created\n";
+                    }
+                    else
+                    {
+                        statusCode = "403";
+                        reasonPhrase = "Forbidden";
+                        responseBody = "\nUser already exists\n";
+                    }
+                }
+                else if (string.Compare(dirName, "sessions") == 0)
+                {
+
+                }
+                else
                 {
                     statusCode = "404";
                     reasonPhrase = "Not Found";
                     responseBody = "\nNot Found, wrong ressource name\n";
-                }
-                else
-                {
-                    Post();
-                    statusCode = "200";
-                    reasonPhrase = "OK";
+                    //Post();
+                    //statusCode = "200";
+                    //reasonPhrase = "OK";
                 }
             }
             else if (string.Compare(httpVerb, "GET") == 0)
