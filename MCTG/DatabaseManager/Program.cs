@@ -51,6 +51,7 @@ namespace DatabaseManager
             */
 
             ConnectionDatabase mycon = new ConnectionDatabase();
+            /*
             if(mycon.CheckLoggedIn("Basic admin-mtcgToken"))
             {
                 Console.WriteLine(mycon.GetUserLoggedIn("Basic admin-mtcgToken"));
@@ -60,6 +61,8 @@ namespace DatabaseManager
                     Console.WriteLine(mycon.GetCoinsFromUser(mycon.GetUserLoggedIn("Basic admin-mtcgToken")));
                 }
             }
+            */
+            Console.WriteLine(mycon.ShowAllCards("altenhof"));
             Console.ReadLine();
         }
     }
