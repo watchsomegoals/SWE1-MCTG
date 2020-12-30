@@ -294,6 +294,154 @@ namespace DatabaseManager
 
             conn.Close();
         }
+        public string ShowAllCards(string username)
+        {
+            string cards = null;
+        
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
 
+            string strcards = "Select name, damage from cards where fk_username = @username";
+            NpgsqlCommand sqlcards = new NpgsqlCommand(strcards, conn);
+            sqlcards.Parameters.AddWithValue("username", username);
+            sqlcards.Prepare();
+
+            NpgsqlDataReader reader = sqlcards.ExecuteReader();
+            while (reader.Read())
+            {
+                string row = "Name: " + reader.GetString(0) + " -- Damage: " + reader.GetDouble(1).ToString() + "\n";
+                cards += row;
+            }
+
+            conn.Close();
+            return cards;
+        }
+        public bool CheckIfDeckConfigured(string username)
+        {
+            int indeck = 1;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcount = "Select count(*) from cards where username = @username and indeck = @indeck";
+            NpgsqlCommand sqlcount = new NpgsqlCommand(strcount, conn);
+            sqlcount.Parameters.AddWithValue("username", username);
+            sqlcount.Parameters.AddWithValue("indeck", indeck);
+            sqlcount.Prepare();
+
+            Int32 count = Convert.ToInt32(sqlcount.ExecuteScalar());
+
+            if(count == 0)
+            {
+                conn.Close();
+                return false;
+            }
+            else
+            {
+                conn.Close();
+                return true;
+            }
+        }
+        public bool CheckIfCardInDeck(string cardsid, string username)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcount = "Select count(*) from cards where cardid = @cards and indeck = 1 and fk_username = @username";
+            NpgsqlCommand sqlcount = new NpgsqlCommand(strcount, conn);
+
+            sqlcount.Parameters.AddWithValue("cards", cardsid);
+            sqlcount.Parameters.AddWithValue("username", username);
+            sqlcount.Prepare();
+            Int32 count = Convert.ToInt32(sqlcount.ExecuteScalar());
+
+            if(count > 0 )
+            {
+                conn.Close();
+                return true;
+            }
+            
+            conn.Close();
+            return false;
+        }
+        public void InsertCardInDeck(string cardsid, string username)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string updatedeckcard = "Update cards set indeck = 1 where cardid = @cardsid and fk_username = @username";
+            NpgsqlCommand sqlupdatedeckcard = new NpgsqlCommand(updatedeckcard, conn);
+
+            sqlupdatedeckcard.Parameters.AddWithValue("cardsid", cardsid);
+            sqlupdatedeckcard.Parameters.AddWithValue("username", username);
+            sqlupdatedeckcard.Prepare();
+            sqlupdatedeckcard.ExecuteNonQuery();
+            
+            conn.Close();
+        }
+        public void ResetDeck(string username)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string updatedeck = "Update cards set indeck = 0 where fk_username = @username";
+            NpgsqlCommand sqlupdatedeck = new NpgsqlCommand(updatedeck, conn);
+            sqlupdatedeck.Parameters.AddWithValue("username", username);
+            sqlupdatedeck.Prepare();
+            sqlupdatedeck.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        public bool CheckIfCardBelongs(string cardsid, string username)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcount = "Select count(*) from cards where cardid = @cards and fk_username = @username";
+            NpgsqlCommand sqlcount = new NpgsqlCommand(strcount, conn);
+
+            sqlcount.Parameters.AddWithValue("cards", cardsid);
+            sqlcount.Parameters.AddWithValue("username", username);
+            sqlcount.Prepare();
+            Int32 count = Convert.ToInt32(sqlcount.ExecuteScalar());
+
+            if(count == 1)
+            {
+                conn.Close();
+                return true;
+            }
+
+            conn.Close();
+            return false;
+        }
+        public string ShowDeckCards(string username)
+        {
+            string cards = null;
+
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcards = "Select name, damage from cards where fk_username = @username and indeck = 1";
+            NpgsqlCommand sqlcards = new NpgsqlCommand(strcards, conn);
+            sqlcards.Parameters.AddWithValue("username", username);
+            sqlcards.Prepare();
+
+            cards = "The cards of " + username + " are: \n\n";
+            NpgsqlDataReader reader = sqlcards.ExecuteReader();
+            while (reader.Read())
+            {
+                string row = "Name: " + reader.GetString(0) + " -- Damage: " + reader.GetDouble(1).ToString() + "\n";
+                cards += row;
+            }
+
+            conn.Close();
+            return cards;
+        }
     }
 }

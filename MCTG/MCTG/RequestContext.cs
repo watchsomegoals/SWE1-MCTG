@@ -142,42 +142,7 @@ namespace MCTG
                 }
                 else if (string.Compare(dirName, "transactions") == 0 && string.Compare(resourceID, "packages") == 0)
                 {
-                    DatabaseManager mycon = new DatabaseManager();
-                    if(mycon.CheckLoggedIn(headerData.ElementAt(4).Value))
-                    {
-                        string username = mycon.GetUserLoggedIn(headerData.ElementAt(4).Value);
-                        int coins = mycon.GetCoinsFromUser(username);
-                        if(coins >= 5)
-                        {
-                            if(mycon.CheckPackageAvailability())
-                            {
-                                int packagedid = mycon.GetPackageidToBuy();
-                                mycon.SpendCoins(username, 5);
-                                mycon.TransferCardsFromPackageToUser(username, packagedid);
-                                statusCode = "200";
-                                reasonPhrase = "OK";
-                                responseBody = "\nPackage with id " + packagedid + " successfully purchased\n";
-                            }
-                            else
-                            {
-                                statusCode = "400";
-                                reasonPhrase = "Bad Request";
-                                responseBody = "\nNot more packages left\n";
-                            }
-                        }
-                        else
-                        {
-                            statusCode = "400";
-                            reasonPhrase = "Bad Request";
-                            responseBody = "\nNot enough coins\n";
-                        }
-                    }
-                    else
-                    {
-                        statusCode = "404";
-                        reasonPhrase = "Not Found";
-                        responseBody = "\nLog in as a user to purchase packages\n";
-                    }
+                    BuyingPackages();
                 }
                 else
                 {
@@ -188,38 +153,37 @@ namespace MCTG
             }
             else if (string.Compare(httpVerb, "GET") == 0)
             {
-                if (string.Compare(dirName, "messages") != 0)
+                if (string.Compare(dirName, "cards") == 0)
+                {
+                    ShowCards();
+                }
+                else if (string.Compare(dirName, "deck") == 0)
+                {
+                    ShowDeck();
+                }
+                else if(string.Compare(dirName, "deck?format=plain") == 0)
+                {
+                    ShowDeckDifferent();
+                }
+                else
                 {
                     statusCode = "404";
                     reasonPhrase = "Not Found";
                     responseBody = "\nNot Found, wrong ressource name\n";
                 }
-                else if (string.Compare(resourceID, null) == 0)
-                {
-                    GetAll();
-                }
-                else
-                {
-                    GetByID();
-                }
             }
             else if (string.Compare(httpVerb, "PUT") == 0)
             {
-                if (string.Compare(dirName, "messages") != 0)
+                if (string.Compare(dirName, "deck") == 0)
                 {
-                    statusCode = "404";
-                    reasonPhrase = "Not Found";
-                    responseBody = "\nBad request, wrong ressource\n";
-                }
-                else if (string.Compare(resourceID, null) == 0)
-                {
-                    statusCode = "400";
-                    reasonPhrase = "Bad Request";
-                    responseBody = "\nBad request, resourceID necessary\n";
+                    ConfigureDeck();
+
                 }
                 else
                 {
-                    Put();
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nNot Found, wrong ressource name\n";
                 }
             }
             else if (string.Compare(httpVerb, "DELETE") == 0)
@@ -243,7 +207,239 @@ namespace MCTG
             }
         }
 
-        private void CreatingPackages()
+        private void ShowDeckDifferent()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+                    if (mycon.CheckIfDeckConfigured(username))
+                    {
+                        statusCode = "200";
+                        reasonPhrase = "OK";
+                        responseBody = "\n" + mycon.ShowDeckCardsDifferent(username) + "\n";
+                    }
+                    else
+                    {
+                        statusCode = "404";
+                        reasonPhrase = "Not Found";
+                        responseBody = "\nNo deck configured\n";
+                    }
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to show all acquired cards\n";
+                }
+
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
+            }
+        }
+
+        private void ShowDeck()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+                    if (mycon.CheckIfDeckConfigured(username))
+                    {
+                        statusCode = "200";
+                        reasonPhrase = "OK";
+                        responseBody = "\n" + mycon.ShowDeckCards(username) + "\n";
+                    }
+                    else
+                    {
+                        statusCode = "404";
+                        reasonPhrase = "Not Found";
+                        responseBody = "\nNo deck configured\n";
+                    }
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to show all acquired cards\n";
+                }
+
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
+            }
+        }
+
+        public void ConfigureDeck()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+                    string[] cardsid = payload.Split(new string[] { ", " }, StringSplitOptions.None);
+
+                    if (cardsid.Length == 4)
+                    {
+                        for (int i = 0; i < cardsid.Length; i++)
+                        {
+                            cardsid[i] = cardsid[i].Replace("[", "");
+                            cardsid[i] = cardsid[i].Replace("]", "");
+                            cardsid[i] = cardsid[i].Replace("\\", "");
+                            cardsid[i] = cardsid[i].Replace("\"", "");
+                        }
+                        int flag = 0;
+                        for (int i = 0; i < cardsid.Length; i++)
+                        {
+                            if (mycon.CheckIfCardInDeck(cardsid[i], username))
+                            {
+                                flag = 1;
+                            }
+                        }
+                        if (flag == 1)
+                        {
+                            statusCode = "400";
+                            reasonPhrase = "Bad Request";
+                            responseBody = "\nAt least one card already in deck\n";
+                        }
+                        else
+                        {
+                            int flag1 = 0;
+                            for (int i = 0; i < cardsid.Length; i++)
+                            {
+                                if (!mycon.CheckIfCardBelongs(cardsid[i], username))
+                                {
+                                    flag1 = 1;
+                                }
+                            }
+                            if (flag1 == 1)
+                            {
+                                statusCode = "400";
+                                reasonPhrase = "Bad Request";
+                                responseBody = "\nAt least one card does not belong to " + username + "\n";
+                            }
+                            else
+                            {
+                                mycon.ResetDeck(username);
+                                for (int i = 0; i < cardsid.Length; i++)
+                                {
+                                    mycon.InsertCardInDeck(cardsid[i], username);
+                                }
+                                statusCode = "200";
+                                reasonPhrase = "OK";
+                                responseBody = "\n" + username + " successfully configured his deck\n";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nNot enough cards set\n";
+                    }
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to configure deck\n";
+                }
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
+            }
+        }
+
+        public void ShowCards()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+
+                    statusCode = "200";
+                    reasonPhrase = "OK";
+                    responseBody = "\n" + mycon.ShowAllCards(username) + "\n";
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to show all acquired cards\n";
+                }
+
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
+            }
+        }
+
+        public void BuyingPackages()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (mycon.CheckLoggedIn(headerData[key]))
+            {
+                string username = mycon.GetUserLoggedIn(headerData[key]);
+                int coins = mycon.GetCoinsFromUser(username);
+                if (coins >= 5)
+                {
+                    if (mycon.CheckPackageAvailability())
+                    {
+                        int packagedid = mycon.GetPackageidToBuy();
+                        mycon.SpendCoins(username, 5);
+                        mycon.TransferCardsFromPackageToUser(username, packagedid);
+                        statusCode = "200";
+                        reasonPhrase = "OK";
+                        responseBody = "\nPackage with id " + packagedid + " successfully purchased\n";
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nNot more packages left\n";
+                    }
+                }
+                else
+                {
+                    statusCode = "400";
+                    reasonPhrase = "Bad Request";
+                    responseBody = "\nNot enough coins\n";
+                }
+            }
+            else
+            {
+                statusCode = "404";
+                reasonPhrase = "Not Found";
+                responseBody = "\nLog in as a user to purchase packages\n";
+            }
+        }
+
+        public void CreatingPackages()
         {
             DatabaseManager mycon = new DatabaseManager();
             int check = mycon.CheckUserForInsertPackage(headerData.ElementAt(4).Value);
@@ -283,7 +479,7 @@ namespace MCTG
             }
         }
 
-        private void LoggingUser()
+        public void LoggingUser()
         {
             User user = JsonConvert.DeserializeObject<User>(payload);
             DatabaseManager mycon = new DatabaseManager();
@@ -308,7 +504,7 @@ namespace MCTG
             }
         }
 
-        private void RegisteringUser()
+        public void RegisteringUser()
         {
             User user = JsonConvert.DeserializeObject<User>(payload);
             DatabaseManager mycon = new DatabaseManager();
@@ -453,21 +649,6 @@ namespace MCTG
                 reasonPhrase = "Not Found";
                 responseBody = "\nNot Found, files do not exist";
             }
-        }
-
-        public void Post()
-        {
-            string path = Path.Combine(Environment.CurrentDirectory, dirName);
-            Directory.CreateDirectory(path);
-            string fileName = null;
-            int counter = Directory.GetFiles(path).Length;
-            //Console.WriteLine("counter: {0}", counter);
-            counter++;
-            fileName = counter.ToString();
-            responseBody = "\n" + fileName;
-            fileName += ".txt";
-            string pathFileName = Path.Combine(path, fileName);
-            //CreateTextFile(pathFileName, counter, fileName, path);
         }
 
         public string ComposeResponse()
