@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MCTG", "MCTG\MCTG.csproj", "{493CC9D5-4589-4758-9D90-7C9005FD5977}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{666EFFDC-9D21-412D-AC06-26D887307613}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NUnitTest", "NUnitTest\NUnitTest.csproj", "{666EFFDC-9D21-412D-AC06-26D887307613}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DatabaseManager", "DatabaseManager\DatabaseManager.csproj", "{13FEE798-0C5E-447E-85BA-4F3FC3E55DA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{666EFFDC-9D21-412D-AC06-26D887307613}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{666EFFDC-9D21-412D-AC06-26D887307613}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{666EFFDC-9D21-412D-AC06-26D887307613}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13FEE798-0C5E-447E-85BA-4F3FC3E55DA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13FEE798-0C5E-447E-85BA-4F3FC3E55DA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13FEE798-0C5E-447E-85BA-4F3FC3E55DA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13FEE798-0C5E-447E-85BA-4F3FC3E55DA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

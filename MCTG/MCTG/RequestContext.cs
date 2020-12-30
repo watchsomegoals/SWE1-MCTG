@@ -5,6 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.IO;
+using Npgsql;
+using Npgsql.Replication.PgOutput.Messages;
+using NpgsqlTypes;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MCTG
 {
@@ -122,23 +127,63 @@ namespace MCTG
             }
             else if (string.Compare(httpVerb, "POST") == 0)
             {
-                if (string.Compare(resourceID, null) != 0)
+                if (string.Compare(dirName, "users") == 0)
                 {
-                    statusCode = "400";
-                    reasonPhrase = "Bad Request";
-                    responseBody = "\nBad request, no resourceID necessary\n";
+                    RegisteringUser();
                 }
-                else if (string.Compare(dirName, "messages") != 0)
+                else if (string.Compare(dirName, "sessions") == 0)
+                {
+                    LoggingUser();
+                }
+                else if (string.Compare(dirName, "packages") == 0)
+                {
+                    CreatingPackages();
+
+                }
+                else if (string.Compare(dirName, "transactions") == 0 && string.Compare(resourceID, "packages") == 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    if(mycon.CheckLoggedIn(headerData.ElementAt(4).Value))
+                    {
+                        string username = mycon.GetUserLoggedIn(headerData.ElementAt(4).Value);
+                        int coins = mycon.GetCoinsFromUser(username);
+                        if(coins >= 5)
+                        {
+                            if(mycon.CheckPackageAvailability())
+                            {
+                                int packagedid = mycon.GetPackageidToBuy();
+                                mycon.SpendCoins(username, 5);
+                                mycon.TransferCardsFromPackageToUser(username, packagedid);
+                                statusCode = "200";
+                                reasonPhrase = "OK";
+                                responseBody = "\nPackage with id " + packagedid + " successfully purchased\n";
+                            }
+                            else
+                            {
+                                statusCode = "400";
+                                reasonPhrase = "Bad Request";
+                                responseBody = "\nNot more packages left\n";
+                            }
+                        }
+                        else
+                        {
+                            statusCode = "400";
+                            reasonPhrase = "Bad Request";
+                            responseBody = "\nNot enough coins\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "404";
+                        reasonPhrase = "Not Found";
+                        responseBody = "\nLog in as a user to purchase packages\n";
+                    }
+                }
+                else
                 {
                     statusCode = "404";
                     reasonPhrase = "Not Found";
                     responseBody = "\nNot Found, wrong ressource name\n";
-                }
-                else
-                {
-                    Post();
-                    statusCode = "200";
-                    reasonPhrase = "OK";
                 }
             }
             else if (string.Compare(httpVerb, "GET") == 0)
@@ -197,6 +242,91 @@ namespace MCTG
                 }
             }
         }
+
+        private void CreatingPackages()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            int check = mycon.CheckUserForInsertPackage(headerData.ElementAt(4).Value);
+            if (check == 0)
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nOnly admin can create packages\n";
+            }
+            else if (check == 1)
+            {
+                statusCode = "404";
+                reasonPhrase = "Not Found";
+                responseBody = "\nLog in as admin before creating packages\n";
+            }
+            else if (check == 2)
+            {
+                int packageid = mycon.GetPackageidForInsertPackage();
+
+                string[] cards = payload.Split(new string[] { "}," }, StringSplitOptions.None);
+                for (int i = 0; i < cards.Length; i++)
+                {
+                    if (i != cards.Length - 1)
+                    {
+                        cards[i] += "}";
+                    }
+                    cards[i] = cards[i].Replace("[", "");
+                    cards[i] = cards[i].Replace("]", "");
+                    Monster card = JsonConvert.DeserializeObject<Monster>(cards[i]);
+                    mycon.InsertCardPackage(card.Id, card.Name, card.Damage, packageid);
+                    Console.WriteLine(cards[i] + "\n");
+                }
+
+                statusCode = "200";
+                reasonPhrase = "OK";
+                responseBody = "\nPackage with id " + packageid + " created\n";
+            }
+        }
+
+        private void LoggingUser()
+        {
+            User user = JsonConvert.DeserializeObject<User>(payload);
+            DatabaseManager mycon = new DatabaseManager();
+            int result = mycon.LogInUser(user.Username, user.Password);
+            if (result == 0)
+            {
+                statusCode = "404";
+                reasonPhrase = "Not Found";
+                responseBody = "\nInvalid credentials\n";
+            }
+            else if (result == 1)
+            {
+                statusCode = "403";
+                reasonPhrase = "Forbidden";
+                responseBody = "\nAlready logged in\n";
+            }
+            else if (result == 2)
+            {
+                statusCode = "200";
+                reasonPhrase = "OK";
+                responseBody = "\nSuccessfully logged in\n";
+            }
+        }
+
+        private void RegisteringUser()
+        {
+            User user = JsonConvert.DeserializeObject<User>(payload);
+            DatabaseManager mycon = new DatabaseManager();
+            if (mycon.InsertUser(user.Username, user.Password))
+            {
+                statusCode = "200";
+                reasonPhrase = "OK";
+                responseBody = "\nUser created\n";
+            }
+            else
+            {
+                statusCode = "403";
+                reasonPhrase = "Forbidden";
+                responseBody = "\nUser already exists\n";
+            }
+        }
+
+//-----------------------------------------------------------------------------------------------------------------------------
 
         public void Delete()
         {
@@ -337,27 +467,7 @@ namespace MCTG
             responseBody = "\n" + fileName;
             fileName += ".txt";
             string pathFileName = Path.Combine(path, fileName);
-            CreateTextFile(pathFileName, counter, fileName, path);
-        }
-
-        public void CreateTextFile(string pathFileName, int counter, string fileName, string path)
-        {
-            if (!File.Exists(pathFileName))
-            {
-                using (StreamWriter sw = File.CreateText(pathFileName))
-                {
-                    sw.Write(this.payload);
-                }
-            }
-            else
-            {
-                counter++;
-                fileName = counter.ToString();
-                responseBody = "\n" + fileName;
-                fileName += ".txt";
-                pathFileName = Path.Combine(path, fileName);
-                CreateTextFile(pathFileName, counter, fileName, path);
-            }
+            //CreateTextFile(pathFileName, counter, fileName, path);
         }
 
         public string ComposeResponse()
