@@ -68,7 +68,7 @@ namespace MCTG
             RequestContext context = new RequestContext();
             NetworkStream stream = _client.GetStream();
             Console.WriteLine("waiting to sleep");
-            Thread.Sleep(10000);
+            Thread.Sleep(2000);
 
             byte[] bytes = new byte[1024];
             string data = null;

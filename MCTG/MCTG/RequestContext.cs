@@ -127,13 +127,7 @@ namespace MCTG
             }
             else if (string.Compare(httpVerb, "POST") == 0)
             {
-                if (string.Compare(resourceID, null) != 0)
-                {
-                    statusCode = "400";
-                    reasonPhrase = "Bad Request";
-                    responseBody = "\nBad request, no resourceID necessary\n";
-                }
-                else if (string.Compare(dirName, "users") == 0)
+                if (string.Compare(dirName, "users") == 0)
                 {
                     RegisteringUser();
                 }
@@ -145,6 +139,45 @@ namespace MCTG
                 {
                     CreatingPackages();
 
+                }
+                else if (string.Compare(dirName, "transactions") == 0 && string.Compare(resourceID, "packages") == 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    if(mycon.CheckLoggedIn(headerData.ElementAt(4).Value))
+                    {
+                        string username = mycon.GetUserLoggedIn(headerData.ElementAt(4).Value);
+                        int coins = mycon.GetCoinsFromUser(username);
+                        if(coins >= 5)
+                        {
+                            if(mycon.CheckPackageAvailability())
+                            {
+                                int packagedid = mycon.GetPackageidToBuy();
+                                mycon.SpendCoins(username, 5);
+                                mycon.TransferCardsFromPackageToUser(username, packagedid);
+                                statusCode = "200";
+                                reasonPhrase = "OK";
+                                responseBody = "\nPackage with id " + packagedid + " successfully purchased\n";
+                            }
+                            else
+                            {
+                                statusCode = "400";
+                                reasonPhrase = "Bad Request";
+                                responseBody = "\nNot more packages left\n";
+                            }
+                        }
+                        else
+                        {
+                            statusCode = "400";
+                            reasonPhrase = "Bad Request";
+                            responseBody = "\nNot enough coins\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "404";
+                        reasonPhrase = "Not Found";
+                        responseBody = "\nLog in as a user to purchase packages\n";
+                    }
                 }
                 else
                 {

@@ -30,14 +30,15 @@ namespace DatabaseManager
             Console.WriteLine(mycon.LogInUser(user, pw));
             Console.ReadLine();
             */
-
+            /*
             ConnectionDatabase mycon = new ConnectionDatabase();
             Console.WriteLine(mycon.GetPackageidForInsertPackage());
             Console.ReadLine();
+            */
 
             /*
             ConnectionDatabase mycon = new ConnectionDatabase();
-            Console.WriteLine(mycon.CheckUserForInsertPackage("Basic admin-mctgToken"));
+            Console.WriteLine(mycon.CheckUserForInsertPackage("Basic admin-mtcgToken"));
             Console.ReadLine();
             
 
@@ -48,6 +49,18 @@ namespace DatabaseManager
             int packageid = 1;
             mycon.InsertCardPackage(id, name, damage, packageid);
             */
+
+            ConnectionDatabase mycon = new ConnectionDatabase();
+            if(mycon.CheckLoggedIn("Basic admin-mtcgToken"))
+            {
+                Console.WriteLine(mycon.GetUserLoggedIn("Basic admin-mtcgToken"));
+                //mycon.SpendCoins(mycon.GetUserLoggedIn("Basic admin-mtcgToken"), 5);
+                if(mycon.CheckPackageAvailability())
+                {
+                    Console.WriteLine(mycon.GetCoinsFromUser(mycon.GetUserLoggedIn("Basic admin-mtcgToken")));
+                }
+            }
+            Console.ReadLine();
         }
     }
 }

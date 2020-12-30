@@ -157,5 +157,143 @@ namespace DatabaseManager
 
             conn.Close();
         }
+        public bool CheckLoggedIn(string token)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcounttoken = "Select count(*) from sessions where token = @token";
+            NpgsqlCommand sqlcountcmd = new NpgsqlCommand(strcounttoken, conn);
+            sqlcountcmd.Parameters.AddWithValue("token", token);
+            sqlcountcmd.Prepare();
+            Int32 count = Convert.ToInt32(sqlcountcmd.ExecuteScalar());
+            if (count == 0)
+            {
+                conn.Close();
+                return false;
+            }
+            else
+            {
+                conn.Close();
+                return true;
+            }
+        }
+        public string GetUserLoggedIn(string token)
+        {
+            string user = null;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetuser = "Select fk_username from sessions where token = @token";
+            NpgsqlCommand sqlgetuser = new NpgsqlCommand(strgetuser, conn);
+            sqlgetuser.Parameters.AddWithValue("token", token);
+            sqlgetuser.Prepare();
+
+            NpgsqlDataReader reader = sqlgetuser.ExecuteReader();
+            while(reader.Read())
+            {
+                user = reader[0].ToString();
+            }
+            return user;
+        }
+
+        public int GetCoinsFromUser(string username)
+        {
+            int coins = 0;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetcoins = "Select coins from users where username = @username";
+            NpgsqlCommand sqlgetcoins = new NpgsqlCommand(strgetcoins, conn);
+            sqlgetcoins.Parameters.AddWithValue("username", username);
+            sqlgetcoins.Prepare();
+
+            NpgsqlDataReader reader = sqlgetcoins.ExecuteReader();
+            while(reader.Read())
+            {
+                coins = Int32.Parse(reader[0].ToString());
+            }
+            return coins;
+        }
+
+        public void SpendCoins(string username, int value)
+        {
+            int coinsold = GetCoinsFromUser(username);
+            int coinsnew = coinsold - value;
+
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strupdate = "Update users set coins = @newcoins where username = @username";
+            NpgsqlCommand sqlupdate = new NpgsqlCommand(strupdate, conn);
+            sqlupdate.Parameters.AddWithValue("newcoins", coinsnew);
+            sqlupdate.Parameters.AddWithValue("username", username);
+            sqlupdate.Prepare();
+            sqlupdate.ExecuteNonQuery();
+
+            conn.Close();
+        }
+
+        public bool CheckPackageAvailability()
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strmax = "Select max(packageid) from cards";
+            NpgsqlCommand sqlmaxcmd = new NpgsqlCommand(strmax, conn);
+
+            Int32 packageid = Convert.ToInt32(sqlmaxcmd.ExecuteScalar());
+
+            if(packageid == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        public int GetPackageidToBuy()
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strmax = "Select max(packageid) from cards";
+            NpgsqlCommand sqlmaxcmd = new NpgsqlCommand(strmax, conn);
+
+            Int32 packageid = Convert.ToInt32(sqlmaxcmd.ExecuteScalar());
+
+            return packageid;
+        }
+        public void TransferCardsFromPackageToUser(string username, int packageid)
+        {
+            int newpackageid = 0;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strupdateuser = "Update cards set fk_username = @username where packageid = @packageid";
+            NpgsqlCommand sqlupdateuser = new NpgsqlCommand(strupdateuser, conn);
+            sqlupdateuser.Parameters.AddWithValue("username", username);
+            sqlupdateuser.Parameters.AddWithValue("packageid", packageid);
+            sqlupdateuser.Prepare();
+            sqlupdateuser.ExecuteNonQuery();
+
+            string strupdatepackageid = "Update cards set packageid = @newpackageid where packageid = @packageid";
+            NpgsqlCommand sqlupdatepackageid = new NpgsqlCommand(strupdatepackageid, conn);
+            sqlupdatepackageid.Parameters.AddWithValue("newpackageid", newpackageid);
+            sqlupdateuser.Parameters.AddWithValue("packageid", packageid);
+            sqlupdateuser.Prepare();
+            sqlupdateuser.ExecuteNonQuery();
+
+            conn.Close();
+        }
+
     }
 }
