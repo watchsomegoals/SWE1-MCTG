@@ -474,5 +474,97 @@ namespace MCTG
             conn.Close();
             return cards;
         }
+        public bool CheckUserAndToken(string username, string token)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcount = "Select count(*) from sessions where fk_username = @username and token = @token";
+            NpgsqlCommand sqlcount = new NpgsqlCommand(strcount, conn);
+            sqlcount.Parameters.AddWithValue("username", username);
+            sqlcount.Parameters.AddWithValue("token", token);
+            sqlcount.Prepare();
+
+            Int32 count = Convert.ToInt32(sqlcount.ExecuteScalar());
+
+            if (count == 1)
+            {
+                conn.Close();
+                return true;
+            }
+            else
+            {
+                conn.Close();
+                return false;
+            }
+        }
+        public bool CheckEditedDataExists(string username)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcount = "Select count(name) from users where username = @username";
+            NpgsqlCommand sqlcount = new NpgsqlCommand(strcount, conn);
+            sqlcount.Parameters.AddWithValue("username", username);
+            sqlcount.Prepare();
+
+            Int32 count = Convert.ToInt32(sqlcount.ExecuteScalar());
+
+            if (count == 1)
+            {
+                conn.Close();
+                return true;
+            }
+            else
+            {
+                conn.Close();
+                return false;
+            }
+        }
+        public void EditUserData(string username, string name, string bio, string image)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strupdate = "Update users set name = @name, bio = @bio, image = @image where username = @username";
+            NpgsqlCommand sqlupdate = new NpgsqlCommand(strupdate, conn);
+
+            sqlupdate.Parameters.AddWithValue("name", name);
+            sqlupdate.Parameters.AddWithValue("bio", bio);
+            sqlupdate.Parameters.AddWithValue("image", image);
+            sqlupdate.Parameters.AddWithValue("username", username);
+            sqlupdate.Prepare();
+            sqlupdate.ExecuteNonQuery();
+
+            conn.Close();
+
+        }
+        public string GetUserData(string username)
+        {
+            string data = null;
+
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strdata = "Select name, bio, image from users where username = @username";
+            NpgsqlCommand sqldata = new NpgsqlCommand(strdata, conn);
+            sqldata.Parameters.AddWithValue("username", username);
+            sqldata.Prepare();
+            data = username + "'s user data: \n\n";
+            NpgsqlDataReader reader = sqldata.ExecuteReader();
+
+            while (reader.Read())
+            {
+                string row = "Name: " + reader.GetString(0) + "     Bio: " + reader.GetString(1) + "     Image: " + reader.GetString(2);
+                data += row;
+            }
+
+            conn.Close();
+            return data;
+        }
     }
 }

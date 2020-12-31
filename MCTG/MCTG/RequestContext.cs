@@ -165,6 +165,32 @@ namespace MCTG
                 {
                     ShowDeckDifferent();
                 }
+                else if(string.Compare(dirName, "users") == 0 && string.Compare(resourceID, null) != 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    string key = "Authorization";
+                    if (mycon.CheckUserAndToken(resourceID, headerData[key]))
+                    {
+                        if(mycon.CheckEditedDataExists(resourceID))
+                        {
+                            statusCode = "200";
+                            reasonPhrase = "OK";
+                            responseBody = "\n" + mycon.GetUserData(resourceID) + "\n";
+                        }
+                        else
+                        {
+                            statusCode = "404";
+                            reasonPhrase = "Not Found";
+                            responseBody = "\nNo data has been added for " + resourceID + "\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "404";
+                        reasonPhrase = "Not Found";
+                        responseBody = "\nNo active session under given username and token\n";
+                    }
+                }
                 else
                 {
                     statusCode = "404";
@@ -177,7 +203,25 @@ namespace MCTG
                 if (string.Compare(dirName, "deck") == 0)
                 {
                     ConfigureDeck();
-
+                }
+                else if (string.Compare(dirName, "users") == 0 && string.Compare(resourceID, null) != 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    string key = "Authorization";
+                    if (mycon.CheckUserAndToken(resourceID, headerData[key]))
+                    {
+                        User user = JsonConvert.DeserializeObject<User>(payload);
+                        mycon.EditUserData(resourceID, user.Name, user.Bio, user.Image);
+                        statusCode = "200";
+                        reasonPhrase = "OK";
+                        responseBody = "\nUser data edited by " + resourceID + "\n";
+                    }
+                    else
+                    {
+                        statusCode = "404";
+                        reasonPhrase = "Not Found";
+                        responseBody = "\nNo active session under given username and token\n";
+                    }
                 }
                 else
                 {

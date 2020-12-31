@@ -10,7 +10,25 @@ namespace MCTG
     {
         private string username;
         private string password;
+        private string name;
+        private string bio;
+        private string image;
         public User() { }
+        public string Image
+        {
+            get { return image; }
+            set { image = value; }
+        }
+        public string Bio
+        {
+            get { return bio; }
+            set { bio = value; }
+        }
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
         public string Username
         {
             get { return username; }
