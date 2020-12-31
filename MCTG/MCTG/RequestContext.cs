@@ -144,6 +144,118 @@ namespace MCTG
                 {
                     BuyingPackages();
                 }
+                else if (string.Compare(dirName, "tradings") == 0 && string.Compare(resourceID, null) != 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    string key = "Authorization";
+                    if (headerData.ContainsKey(key))
+                    {
+                        if (mycon.CheckLoggedIn(headerData[key]))
+                        {
+                            string username = mycon.GetUserLoggedIn(headerData[key]);
+                            if(mycon.CheckIfDealBelongsToUser(username, resourceID))
+                            {
+                                statusCode = "400";
+                                reasonPhrase = "Bad Request";
+                                responseBody = "\nCannot trade with yourself\n";
+                            }
+                            else
+                            {
+                                string dealid = resourceID;
+                                string secondcardid = payload.Replace("\"", "");
+                                double mindamage = mycon.GetMinDamageDeal(dealid);
+                                double damage = mycon.GetDamageCardFromCards(secondcardid);
+
+                                if(damage >= mindamage)
+                                {
+                                    string typedeal = mycon.GetTypeDeal(dealid);
+                                    string cardname = mycon.GetNameCardFromCards(secondcardid);
+                                    string type = getTypeFromCardName(cardname);
+                                    if(type == typedeal)
+                                    {
+                                        string dealuser = mycon.GetUserfromDeal(dealid);
+                                        mycon.ExecuteTransaction(dealid, dealuser, username, secondcardid);
+                                        mycon.DeleteTradingDeal(dealid);
+                                        statusCode = "200";
+                                        reasonPhrase = "OK";
+                                        responseBody = "\nTransaction successfully executed\n";
+                                    }
+                                    else
+                                    {
+                                        statusCode = "400";
+                                        reasonPhrase = "Bad Request";
+                                        responseBody = "\nType of card not good for deal\n";
+                                    }
+                                }
+                                else
+                                {
+                                    statusCode = "400";
+                                    reasonPhrase = "Bad Request";
+                                    responseBody = "\nDamage lower than minimum damage of deal\n";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            statusCode = "404";
+                            reasonPhrase = "Not Found";
+                            responseBody = "\nLog in as a user to show all acquired cards\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nSession token is missing\n";
+                    }
+                }
+                else if (string.Compare(dirName, "tradings") == 0 && string.Compare(resourceID, null) == 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    string key = "Authorization";
+                    if (headerData.ContainsKey(key))
+                    {
+                        if (mycon.CheckLoggedIn(headerData[key]))
+                        {
+                            string username = mycon.GetUserLoggedIn(headerData[key]);
+                            Store store = JsonConvert.DeserializeObject<Store>(payload);
+                            if(mycon.CheckIfCardBelongs(store.CardToTrade, username))
+                            {
+                                if(mycon.CheckIfCardInDeck(store.CardToTrade, username))
+                                {
+                                    statusCode = "400";
+                                    reasonPhrase = "Bad Request";
+                                    responseBody = "\nCard which is in deck cannot be traded\n";
+                                }
+                                else
+                                {
+                                    mycon.InsertTradingDeal(store.Id, username, store.CardToTrade, store.Type, store.MinimumDamage);
+                                    statusCode = "200";
+                                    reasonPhrase = "OK";
+                                    responseBody = "\n" + username + " put a card up for trade\n";
+                                }
+                            }
+                            else
+                            {
+                                statusCode = "404";
+                                reasonPhrase = "Not Found";
+                                responseBody = "\nCard does not belong to " + username + "\n";
+                            }
+                        }
+                        else
+                        {
+                            statusCode = "404";
+                            reasonPhrase = "Not Found";
+                            responseBody = "\nLog in as a user to show all acquired cards\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nSession token is missing\n";
+                    }
+                }
                 else
                 {
                     statusCode = "404";
@@ -177,6 +289,42 @@ namespace MCTG
                 {
                     ShowScoreboard();
                 }
+                else if (string.Compare(dirName, "tradings") == 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    string key = "Authorization";
+                    if (headerData.ContainsKey(key))
+                    {
+                        if (mycon.CheckLoggedIn(headerData[key]))
+                        {
+                            string username = mycon.GetUserLoggedIn(headerData[key]);
+                            if(mycon.CheckTradingDeals())
+                            {
+                                statusCode = "200";
+                                reasonPhrase = "OK";
+                                responseBody = "\n" + mycon.GetTradingDeals() + "\n";
+                            }
+                            else
+                            {
+                                statusCode = "404";
+                                reasonPhrase = "Not Found";
+                                responseBody = "\nNo trading deals available at the moment\n";
+                            }                          
+                        }
+                        else
+                        {
+                            statusCode = "404";
+                            reasonPhrase = "Not Found";
+                            responseBody = "\nLog in as a user to show all acquired cards\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nSession token is missing\n";
+                    }
+                }
                 else
                 {
                     statusCode = "404";
@@ -203,22 +351,60 @@ namespace MCTG
             }
             else if (string.Compare(httpVerb, "DELETE") == 0)
             {
-                if (string.Compare(dirName, "messages") != 0)
+                if (string.Compare(dirName, "tradings") == 0 && string.Compare(resourceID, null) != 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    string key = "Authorization";
+                    if (headerData.ContainsKey(key))
+                    {
+                        if (mycon.CheckLoggedIn(headerData[key]))
+                        {
+                            string username = mycon.GetUserLoggedIn(headerData[key]);
+                            if(mycon.CheckIfDealBelongsToUser(username, resourceID))
+                            {
+                                mycon.DeleteTradingDeal(resourceID);
+                                statusCode = "200";
+                                reasonPhrase = "OK";
+                                responseBody = "\n" + username + " deleted a trading deal\n";
+                            }
+                            else
+                            {
+                                statusCode = "400";
+                                reasonPhrase = "Bad Request";
+                                responseBody = "\nTrading deal does not belong to " +username +"\n";
+                            }
+                        }
+                        else
+                        {
+                            statusCode = "404";
+                            reasonPhrase = "Not Found";
+                            responseBody = "\nLog in as a user to delete a trading deal\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nSession token is missing\n";
+                    }
+                }
+                else
                 {
                     statusCode = "404";
                     reasonPhrase = "Not Found";
                     responseBody = "\nNot Found, wrong ressource name\n";
                 }
-                else if (string.Compare(resourceID, null) == 0)
-                {
-                    statusCode = "400";
-                    reasonPhrase = "Bad Request";
-                    responseBody = "\nBad request, resourceID necessary\n";
-                }
-                else
-                {
-                    Delete();
-                }
+            }
+        }
+        public string getTypeFromCardName(string cardname)
+        {
+            if(cardname.Contains("Spell"))
+            {
+                return "spell";
+            }
+            else
+            {
+                return "monster";
             }
         }
 

@@ -552,7 +552,6 @@ namespace MCTG
             sqlupdate.ExecuteNonQuery();
 
             conn.Close();
-
         }
         public string GetUserData(string username)
         {
@@ -745,6 +744,251 @@ namespace MCTG
 
             conn.Close();
             return board;
+        }
+        public bool CheckTradingDeals()
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcount = "Select count(dealid) from store";
+            NpgsqlCommand sqlcount = new NpgsqlCommand(strcount, conn);
+
+            Int32 count = Convert.ToInt32(sqlcount.ExecuteScalar());
+
+            if (count > 0)
+            {
+                conn.Close();
+                return true;
+            }
+            else
+            {
+                conn.Close();
+                return false;
+            }
+        }
+        public void InsertTradingDeal(string dealid, string username, string cardid, string type, double mindamage)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcomm = "Insert into store (dealid,fk_username,cardtotrade,type,minimumdamage) Values (@dealid, @username, @cardid, @type, @mindamage)";
+
+            NpgsqlCommand sqlcomm = new NpgsqlCommand(strcomm, conn);
+            sqlcomm.Parameters.AddWithValue("dealid", dealid);
+            sqlcomm.Parameters.AddWithValue("username", username);
+            sqlcomm.Parameters.AddWithValue("cardid", cardid);
+            sqlcomm.Parameters.AddWithValue("type", type);
+            sqlcomm.Parameters.AddWithValue("mindamage", mindamage);
+
+            sqlcomm.Prepare();
+            sqlcomm.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        public string GetTradingDeals()
+        {
+            string deals = null;
+            int count = 1;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strdeals = "Select s.fk_username, c.name, c.damage, s.type, s.minimumdamage from store s join cards c on s.cardtotrade = c.cardid";
+            NpgsqlCommand sqldeals = new NpgsqlCommand(strdeals, conn);
+            sqldeals.Prepare();
+
+            deals = "Available trading deals: \n\n";
+            NpgsqlDataReader reader = sqldeals.ExecuteReader();
+            while (reader.Read())
+            {
+                string row = count + ".Username: " + reader.GetString(0) + "-->Trading: " + reader.GetString(1) + "-->with Damage: "+ reader.GetDouble(2).ToString() + "-->for: " + reader.GetString(3) + "-->with minimum Damage: " + reader.GetDouble(4).ToString() + "\n";
+                deals += row;
+                count++;
+            }
+
+            conn.Close();
+            return deals;
+        }
+        public bool CheckIfDealBelongsToUser(string username, string dealid)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strcount = "Select count(*) from store where dealid = @dealid and fk_username = @username";
+            NpgsqlCommand sqlcount = new NpgsqlCommand(strcount, conn);
+
+            sqlcount.Parameters.AddWithValue("dealid", dealid);
+            sqlcount.Parameters.AddWithValue("username", username);
+            sqlcount.Prepare();
+            Int32 count = Convert.ToInt32(sqlcount.ExecuteScalar());
+
+            if (count == 1)
+            {
+                conn.Close();
+                return true;
+            }
+
+            conn.Close();
+            return false;
+        }
+        public void DeleteTradingDeal(string dealid)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strdelete = "Delete from store where dealid = @dealid";
+            NpgsqlCommand sqldelete = new NpgsqlCommand(strdelete, conn);
+
+            sqldelete.Parameters.AddWithValue("dealid", dealid);
+            sqldelete.Prepare();
+            sqldelete.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        public double GetMinDamageDeal(string dealid)
+        {
+            double mindamage = 0;
+           
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetmin = "Select minimumdamage from store where dealid = @dealid";
+            NpgsqlCommand sqlgetmin = new NpgsqlCommand(strgetmin, conn);
+            sqlgetmin.Parameters.AddWithValue("dealid", dealid);
+            sqlgetmin.Prepare();
+
+            mindamage = Convert.ToDouble(sqlgetmin.ExecuteScalar());
+         
+            conn.Close();
+            return mindamage;
+        }
+        public double GetDamageCardFromCards(string cardid)
+        {
+            double damage = 0;
+
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetdamage = "Select damage from cards where cardid = @cardid";
+            NpgsqlCommand sqlgetdamage = new NpgsqlCommand(strgetdamage, conn);
+            sqlgetdamage.Parameters.AddWithValue("cardid", cardid);
+            sqlgetdamage.Prepare();
+
+            damage = Convert.ToDouble(sqlgetdamage.ExecuteScalar());
+
+            conn.Close();
+            return damage;
+        }
+        public string GetTypeDeal(string dealid)
+        {
+            string type = null;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgettype = "Select type from store where dealid = @dealid";
+            NpgsqlCommand sqlgettype = new NpgsqlCommand(strgettype, conn);
+            sqlgettype.Parameters.AddWithValue("dealid", dealid);
+            sqlgettype.Prepare();
+
+            NpgsqlDataReader reader = sqlgettype.ExecuteReader();
+            while (reader.Read())
+            {
+                type = reader[0].ToString();
+            }
+            conn.Close();
+            return type;
+        }
+        public string GetNameCardFromCards(string cardid)
+        {
+            string name = null;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetname = "Select name from cards where cardid = @cardid";
+            NpgsqlCommand sqlgetname = new NpgsqlCommand(strgetname, conn);
+            sqlgetname.Parameters.AddWithValue("cardid", cardid);
+            sqlgetname.Prepare();
+
+            NpgsqlDataReader reader = sqlgetname.ExecuteReader();
+            while (reader.Read())
+            {
+                name = reader[0].ToString();
+            }
+            conn.Close();
+            return name;
+        }
+        public void ExecuteTransaction(string dealid, string dealuser, string otheruser, string othercard)
+        {
+            string dealcard = GetCardIdFromDeal(dealid);
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string updatecardother = "Update cards set fk_username = @otheruser where cardid = @dealcard";
+            NpgsqlCommand sqlupdateother = new NpgsqlCommand(updatecardother, conn);
+
+            sqlupdateother.Parameters.AddWithValue("otheruser", otheruser);
+            sqlupdateother.Parameters.AddWithValue("dealcard", dealcard);
+            sqlupdateother.Prepare();
+            sqlupdateother.ExecuteNonQuery();
+
+            string updatecarddeal = "Update cards set fk_username = @dealuser where cardid = @othercard";
+            NpgsqlCommand sqlupdatedeal = new NpgsqlCommand(updatecarddeal, conn);
+
+            sqlupdatedeal.Parameters.AddWithValue("dealuser", dealuser);
+            sqlupdatedeal.Parameters.AddWithValue("othercard", othercard);
+            sqlupdatedeal.Prepare();
+            sqlupdatedeal.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        public string GetCardIdFromDeal(string dealid)
+        {
+            string cardid = null;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetcardid = "Select cardtotrade from store where dealid = @dealid";
+            NpgsqlCommand sqlgetcardid = new NpgsqlCommand(strgetcardid, conn);
+            sqlgetcardid.Parameters.AddWithValue("dealid", dealid);
+            sqlgetcardid.Prepare();
+
+            NpgsqlDataReader reader = sqlgetcardid.ExecuteReader();
+            while (reader.Read())
+            {
+                cardid = reader[0].ToString();
+            }
+            conn.Close();
+            return cardid;
+        }
+        public string GetUserfromDeal(string dealid)
+        {
+            string user = null;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetuser = "Select fk_username from store where dealid = @dealid";
+            NpgsqlCommand sqlgetuser = new NpgsqlCommand(strgetuser, conn);
+            sqlgetuser.Parameters.AddWithValue("dealid", dealid);
+            sqlgetuser.Prepare();
+
+            NpgsqlDataReader reader = sqlgetuser.ExecuteReader();
+            while (reader.Read())
+            {
+                user = reader[0].ToString();
+            }
+            conn.Close();
+            return user;
         }
     }
 }
