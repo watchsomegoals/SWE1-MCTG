@@ -17,6 +17,7 @@ namespace MCTG
 
             int coins = 20;
 
+
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
             conn.Open();
@@ -30,14 +31,25 @@ namespace MCTG
             if (count == 0)
             {
                 string strcomm = "Insert into users (username,password,coins) Values (@username, @password, @coins)";
-
                 NpgsqlCommand sqlcomm = new NpgsqlCommand(strcomm, conn);
-
                 sqlcomm.Parameters.AddWithValue("username", username);
                 sqlcomm.Parameters.AddWithValue("password", password);
                 sqlcomm.Parameters.AddWithValue("coins", coins);
                 sqlcomm.Prepare();
                 sqlcomm.ExecuteNonQuery();
+
+                string strstats = "Insert into stats (fk_username,elo,won,lost,played) Values (@username, 100, 0, 0, 0)";
+                NpgsqlCommand sqlstats = new NpgsqlCommand(strstats, conn);
+                sqlstats.Parameters.AddWithValue("username", username);
+                sqlstats.Prepare();
+                sqlstats.ExecuteNonQuery();
+
+                string strscoreboard = "Insert into scoreboard (fk_username, elo) Values (@username, 100)";
+                NpgsqlCommand sqlscoreboard = new NpgsqlCommand(strscoreboard, conn);
+                sqlscoreboard.Parameters.AddWithValue("username", username);
+                sqlscoreboard.Prepare();
+                sqlscoreboard.ExecuteNonQuery();
+
                 conn.Close();
                 return true;
             }
@@ -565,6 +577,174 @@ namespace MCTG
 
             conn.Close();
             return data;
+        }
+        public int getElo(string username)
+        {
+            int elo = 0;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetelo = "Select elo from stats where fk_username = @username";
+            NpgsqlCommand sqlgetelo = new NpgsqlCommand(strgetelo, conn);
+            sqlgetelo.Parameters.AddWithValue("username", username);
+            sqlgetelo.Prepare();
+
+            NpgsqlDataReader reader = sqlgetelo.ExecuteReader();
+            while (reader.Read())
+            {
+                elo = Int32.Parse(reader[0].ToString());
+            }
+            conn.Close();
+            return elo;
+        }
+        public int getWon(string username)
+        {
+            int won = 0;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetwon = "Select won from stats where username = @username";
+            NpgsqlCommand sqlgetwon = new NpgsqlCommand(strgetwon, conn);
+            sqlgetwon.Parameters.AddWithValue("username", username);
+            sqlgetwon.Prepare();
+
+            NpgsqlDataReader reader = sqlgetwon.ExecuteReader();
+            while (reader.Read())
+            {
+                won = Int32.Parse(reader[0].ToString());
+            }
+            conn.Close();
+            return won;
+        }
+        public int getLost(string username)
+        {
+            int lost = 0;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strgetlost = "Select lost from stats where username = @username";
+            NpgsqlCommand sqlgetlost = new NpgsqlCommand(strgetlost, conn);
+            sqlgetlost.Parameters.AddWithValue("username", username);
+            sqlgetlost.Prepare();
+
+            NpgsqlDataReader reader = sqlgetlost.ExecuteReader();
+            while (reader.Read())
+            {
+                lost = Int32.Parse(reader[0].ToString());
+            }
+            conn.Close();
+            return lost;
+        }
+        public void ChangeScoreAndStatsIfWon(string username)
+        {
+            int eloold = getElo(username);
+            int wonold = getWon(username);
+            int lost = getLost(username);
+            int elonew = eloold + 5;
+            int wonnew = wonold + 1;
+            int played = wonnew + lost;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strupdatestats = "Update stats set elo = @elonew, won = @wonnew, played = @played where fk_username = @username";
+            NpgsqlCommand sqlupdatestats = new NpgsqlCommand(strupdatestats, conn);
+            sqlupdatestats.Parameters.AddWithValue("elonew", elonew);
+            sqlupdatestats.Parameters.AddWithValue("wonnew", wonnew);
+            sqlupdatestats.Parameters.AddWithValue("played", played);
+            sqlupdatestats.Parameters.AddWithValue("username", username);
+            sqlupdatestats.Prepare();
+            sqlupdatestats.ExecuteNonQuery();
+
+            string strupdatescore = "Update scoreboard set elo = @elonew where fk_username = @username";
+            NpgsqlCommand sqlupdatescore = new NpgsqlCommand(strupdatescore, conn);
+            sqlupdatescore.Parameters.AddWithValue("elonew", elonew);
+            sqlupdatescore.Parameters.AddWithValue("username", username);
+            sqlupdatescore.Prepare();
+            sqlupdatescore.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        public void ChangeScoreAndStatsIfLost(string username)
+        {
+            int eloold = getElo(username);
+            int won = getWon(username);
+            int lostold = getLost(username);
+            int elonew = eloold - 3;
+            int lostnew = lostold + 1;
+            int played = won + lostnew;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strupdatestats = "Update stats set elo = @elonew, lost = @lostnew, played = @played where fk_username = @username";
+            NpgsqlCommand sqlupdatestats = new NpgsqlCommand(strupdatestats, conn);
+            sqlupdatestats.Parameters.AddWithValue("elonew", elonew);
+            sqlupdatestats.Parameters.AddWithValue("lostnew", lostnew);
+            sqlupdatestats.Parameters.AddWithValue("played", played);
+            sqlupdatestats.Parameters.AddWithValue("username", username);
+            sqlupdatestats.Prepare();
+            sqlupdatestats.ExecuteNonQuery();
+
+            string strupdatescore = "Update scoreboard set elo = @elonew where fk_username = @username";
+            NpgsqlCommand sqlupdatescore = new NpgsqlCommand(strupdatescore, conn);
+            sqlupdatescore.Parameters.AddWithValue("elonew", elonew);
+            sqlupdatescore.Parameters.AddWithValue("username", username);
+            sqlupdatescore.Prepare();
+            sqlupdatescore.ExecuteNonQuery();
+
+            conn.Close();
+        }
+        public string GetUserStats(string username)
+        {
+            string stats = null;
+
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strstats = "Select elo, won, lost, played from stats where fk_username = @username";
+            NpgsqlCommand sqlstats = new NpgsqlCommand(strstats, conn);
+            sqlstats.Parameters.AddWithValue("username", username);
+            sqlstats.Prepare();
+            stats = username + "'s stats: \n\n";
+            NpgsqlDataReader reader = sqlstats.ExecuteReader();
+
+            while (reader.Read())
+            {
+                string row = "Elo: " + reader.GetInt32(0).ToString() + "     Won: " + reader.GetInt32(1).ToString() + "     Lost: " + reader.GetInt32(2).ToString() + "     Played: " + reader.GetInt32(3).ToString();
+                stats += row;
+            }
+
+            conn.Close();
+            return stats;
+        }
+        public string GetScoreboard()
+        {
+            string board = null;
+            int count = 1;
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strboard = "Select fk_username, elo from scoreboard order by elo desc";
+            NpgsqlCommand sqlboard = new NpgsqlCommand(strboard, conn);
+            sqlboard.Prepare();
+
+            board = "Ranking: \n\n";
+            NpgsqlDataReader reader = sqlboard.ExecuteReader();
+            while (reader.Read())
+            {
+                string row = count + ".Username: " + reader.GetString(0) + "     Elo: " + reader.GetInt32(1).ToString() + "\n";
+                board += row;
+                count++;
+            }
+
+            conn.Close();
+            return board;
         }
     }
 }

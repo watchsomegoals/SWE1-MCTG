@@ -167,29 +167,15 @@ namespace MCTG
                 }
                 else if(string.Compare(dirName, "users") == 0 && string.Compare(resourceID, null) != 0)
                 {
-                    DatabaseManager mycon = new DatabaseManager();
-                    string key = "Authorization";
-                    if (mycon.CheckUserAndToken(resourceID, headerData[key]))
-                    {
-                        if(mycon.CheckEditedDataExists(resourceID))
-                        {
-                            statusCode = "200";
-                            reasonPhrase = "OK";
-                            responseBody = "\n" + mycon.GetUserData(resourceID) + "\n";
-                        }
-                        else
-                        {
-                            statusCode = "404";
-                            reasonPhrase = "Not Found";
-                            responseBody = "\nNo data has been added for " + resourceID + "\n";
-                        }
-                    }
-                    else
-                    {
-                        statusCode = "404";
-                        reasonPhrase = "Not Found";
-                        responseBody = "\nNo active session under given username and token\n";
-                    }
+                    ShowData();
+                }
+                else if (string.Compare(dirName, "stats") == 0)
+                {
+                    ShowStats();
+                }
+                else if (string.Compare(dirName, "score") == 0)
+                {
+                    ShowScoreboard();
                 }
                 else
                 {
@@ -206,22 +192,7 @@ namespace MCTG
                 }
                 else if (string.Compare(dirName, "users") == 0 && string.Compare(resourceID, null) != 0)
                 {
-                    DatabaseManager mycon = new DatabaseManager();
-                    string key = "Authorization";
-                    if (mycon.CheckUserAndToken(resourceID, headerData[key]))
-                    {
-                        User user = JsonConvert.DeserializeObject<User>(payload);
-                        mycon.EditUserData(resourceID, user.Name, user.Bio, user.Image);
-                        statusCode = "200";
-                        reasonPhrase = "OK";
-                        responseBody = "\nUser data edited by " + resourceID + "\n";
-                    }
-                    else
-                    {
-                        statusCode = "404";
-                        reasonPhrase = "Not Found";
-                        responseBody = "\nNo active session under given username and token\n";
-                    }
+                    EditData();
                 }
                 else
                 {
@@ -251,7 +222,112 @@ namespace MCTG
             }
         }
 
-        private void ShowDeckDifferent()
+        public void ShowScoreboard()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+
+                    statusCode = "200";
+                    reasonPhrase = "OK";
+                    responseBody = "\n" + mycon.GetScoreboard() + "\n";
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to show all acquired cards\n";
+                }
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
+            }
+        }
+
+        public void ShowStats()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+
+                    statusCode = "200";
+                    reasonPhrase = "OK";
+                    responseBody = "\n" + mycon.GetUserStats(username) + "\n";
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to show all acquired cards\n";
+                }
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
+            }
+        }
+
+        public void ShowData()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (mycon.CheckUserAndToken(resourceID, headerData[key]))
+            {
+                if (mycon.CheckEditedDataExists(resourceID))
+                {
+                    statusCode = "200";
+                    reasonPhrase = "OK";
+                    responseBody = "\n" + mycon.GetUserData(resourceID) + "\n";
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nNo data has been added for " + resourceID + "\n";
+                }
+            }
+            else
+            {
+                statusCode = "404";
+                reasonPhrase = "Not Found";
+                responseBody = "\nNo active session under given username and token\n";
+            }
+        }
+
+        public void EditData()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (mycon.CheckUserAndToken(resourceID, headerData[key]))
+            {
+                User user = JsonConvert.DeserializeObject<User>(payload);
+                mycon.EditUserData(resourceID, user.Name, user.Bio, user.Image);
+                statusCode = "200";
+                reasonPhrase = "OK";
+                responseBody = "\nUser data edited by " + resourceID + "\n";
+            }
+            else
+            {
+                statusCode = "404";
+                reasonPhrase = "Not Found";
+                responseBody = "\nNo active session under given username and token\n";
+            }
+        }
+
+        public void ShowDeckDifferent()
         {
             DatabaseManager mycon = new DatabaseManager();
             string key = "Authorization";
@@ -289,7 +365,7 @@ namespace MCTG
             }
         }
 
-        private void ShowDeck()
+        public void ShowDeck()
         {
             DatabaseManager mycon = new DatabaseManager();
             string key = "Authorization";
@@ -432,7 +508,6 @@ namespace MCTG
                     reasonPhrase = "Not Found";
                     responseBody = "\nLog in as a user to show all acquired cards\n";
                 }
-
             }
             else
             {
