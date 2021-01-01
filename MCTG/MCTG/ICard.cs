@@ -19,7 +19,7 @@ public enum MonsterType
 {
     def = 0,
     dragon,
-    fireelf,
+    elf,
     goblin,
     ork,
     wizard,

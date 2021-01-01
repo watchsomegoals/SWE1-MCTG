@@ -99,7 +99,7 @@ namespace MCTG
                 {
                     return 0;
                 }
-                else if (defender.MonsterType == MonsterType.fireelf && MonsterType == MonsterType.dragon)
+                else if (defender.MonsterType == MonsterType.elf && MonsterType == MonsterType.dragon)
                 {
                     return 0;
                 }
@@ -118,7 +118,6 @@ namespace MCTG
                 return -1;
             }
         }
-
         public string Id
         {
             get => _id;

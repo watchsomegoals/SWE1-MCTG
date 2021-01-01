@@ -990,5 +990,35 @@ namespace MCTG
             conn.Close();
             return user;
         }
+        public void FillDeckOfUser(User user)
+        {
+            RequestContext req = new RequestContext();
+            string id = null;
+            string name = null;
+            double damage = 0;
+            string elementType = null;
+            string monsterType = null;
+
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strselectcards = "Select cardid, name, damage from cards where fk_username = @username and indeck = 1";
+            NpgsqlCommand sqlselectcards = new NpgsqlCommand(strselectcards, conn);
+            sqlselectcards.Parameters.AddWithValue("username", user.Username);
+            sqlselectcards.Prepare();
+            NpgsqlDataReader reader = sqlselectcards.ExecuteReader();
+
+            while(reader.Read())
+            {
+                id = reader.GetString(0);
+                name = reader.GetString(1);
+                damage = reader.GetDouble(2);
+                elementType = req.GetElementTypeFromCardName(name);
+                monsterType = req.GetMonsterTypeFromCardName(name);
+                user.AddCardToDeckOfUser(id, name, damage, elementType, monsterType);
+            }
+
+        }
     }
 }
