@@ -148,6 +148,35 @@ namespace MCTG
                 {
                     DoTrade();
                 }
+                else if (string.Compare(dirName, "tradings") == 0 && string.Compare(resourceID, null) == 0)
+                {
+                    DatabaseManager mycon = new DatabaseManager();
+                    string key = "Authorization";
+                    if (headerData.ContainsKey(key))
+                    {
+                        if (mycon.CheckLoggedIn(headerData[key]))
+                        {
+                            string username = mycon.GetUserLoggedIn(headerData[key]);
+                            Store store = JsonConvert.DeserializeObject<Store>(payload);
+                            mycon.InsertTradingDeal(store.Id, username, store.CardToTrade, store.Type, store.MinimumDamage);
+                            statusCode = "200";
+                            reasonPhrase = "OK";
+                            responseBody = "\n" + username + " put a card up for trade\n";
+                        }
+                        else
+                        {
+                            statusCode = "404";
+                            reasonPhrase = "Not Found";
+                            responseBody = "\nLog in as a user to show all acquired cards\n";
+                        }
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nSession token is missing\n";
+                    }
+                }
                 else if (string.Compare(dirName, "battles") == 0)
                 {
                     DatabaseManager mycon = new DatabaseManager();
@@ -161,8 +190,7 @@ namespace MCTG
                             mycon.FillDeckOfUser(user);
                             Arena.PrepareFight(user);
                             Arena.Restart.WaitOne();
-                            mycon.ChangeScoreAndStatsIfLost(Arena.LoserUser);
-                            mycon.ChangeScoreAndStatsIfWon(Arena.WinnerUser);
+                            
                             statusCode = "200";
                             reasonPhrase = "OK";
                             responseBody = "\n" + Arena.log + "\n";
