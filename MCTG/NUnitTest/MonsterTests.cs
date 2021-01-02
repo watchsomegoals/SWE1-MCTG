@@ -12,6 +12,7 @@ namespace NUnitTest
     [TestFixture]
     class MonsterTests
     {
+        /*
         Monster monster;
         Spell spell;
         int result;
@@ -40,5 +41,6 @@ namespace NUnitTest
             //assert
             Assert.AreEqual(1, result);
         }
+        */
     }
 }
