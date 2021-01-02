@@ -3,42 +3,45 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace MCTG
 {
-    public class Arena
+    public static class Arena
     {
-        private User user1;
-        private User user2;
-        int rounds = 1;
-        private string log = null;
-        public Arena(User _user1, User _user2)
-        {
-            user1 = new User(_user1);
-            user2 = new User(_user2);
-        }
+        public static List<User> players = new List<User>();
+        public static string winneruser;
+        public static string loseruser;
+        public static int rounds = 1;
+        public static string log = null;
+        public static ManualResetEvent Restart { get; } = new ManualResetEvent(false);
 
-        public string battle()
+        public static void PrepareFight(User user)
         {
-            
+            players.Add(user);
+            if(players.Count == 2)
+            {
+                battle(players[0], players[1]);
+                players.RemoveAt(1);
+                players.RemoveAt(0);
+            }
+        }
+        public static void battle(User user1, User user2)
+        {
             double damage1 = 0;
             double damage2 = 0;
             RequestContext req = new RequestContext();
             string element = null;
             string card = null;
 
-
-            
             while (rounds <= 100)
             {
                 if (user1.Deck.Count == 0)
                 {
-                    log += user2.Username + " wins!\n";
                     break;
                 }
                 else if (user2.Deck.Count == 0)
                 {
-                    log += user1.Username + " wins!\n";
                     break;
                 }
 
@@ -735,12 +738,34 @@ namespace MCTG
 
                 rounds++;
             }
+            if (user1.Deck.Count == 0)
+            {
+                winneruser = user2.Username;
+                loseruser = user1.Username;
+            }
+            else if (user2.Deck.Count == 0)
+            {
+                winneruser = user1.Username;
+                loseruser = user2.Username;
+            }
 
             if (rounds == 101)
             {
                 log += "Match ended in a draw\n";
             }
-            return log;
+            
+            log += winneruser + " wins!\n";
+            Restart.Set();
+        }
+        public static string WinnerUser
+        {
+            get { return winneruser; }
+            set { winneruser = value; }
+        }
+        public static string LoserUser
+        {
+            get { return loseruser; }
+            set { loseruser = value; }
         }
     }
 }

@@ -604,7 +604,7 @@ namespace MCTG
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
             conn.Open();
 
-            string strgetwon = "Select won from stats where username = @username";
+            string strgetwon = "Select won from stats where fk_username = @username";
             NpgsqlCommand sqlgetwon = new NpgsqlCommand(strgetwon, conn);
             sqlgetwon.Parameters.AddWithValue("username", username);
             sqlgetwon.Prepare();
@@ -624,7 +624,7 @@ namespace MCTG
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
             conn.Open();
 
-            string strgetlost = "Select lost from stats where username = @username";
+            string strgetlost = "Select lost from stats where fk_username = @username";
             NpgsqlCommand sqlgetlost = new NpgsqlCommand(strgetlost, conn);
             sqlgetlost.Parameters.AddWithValue("username", username);
             sqlgetlost.Prepare();

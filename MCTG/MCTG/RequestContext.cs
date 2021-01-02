@@ -150,21 +150,37 @@ namespace MCTG
                 }
                 else if (string.Compare(dirName, "battles") == 0)
                 {
-                    User user1 = new User();
-                    User user2 = new User();
-                    user1.Username = "kienboec";
-                    user2.Username = "altenhof";
-
                     DatabaseManager mycon = new DatabaseManager();
-                    mycon.FillDeckOfUser(user1);
-                    mycon.FillDeckOfUser(user2);
+                    string key = "Authorization";
+                    if (headerData.ContainsKey(key))
+                    {
+                        if (mycon.CheckLoggedIn(headerData[key]))
+                        {
+                            User user = new User();
+                            user.Username = mycon.GetUserLoggedIn(headerData[key]);
+                            mycon.FillDeckOfUser(user);
+                            Arena.PrepareFight(user);
+                            Arena.Restart.WaitOne();
+                            mycon.ChangeScoreAndStatsIfLost(Arena.LoserUser);
+                            mycon.ChangeScoreAndStatsIfWon(Arena.WinnerUser);
+                            statusCode = "200";
+                            reasonPhrase = "OK";
+                            responseBody = "\n" + Arena.log + "\n";
+                        }
+                        else
+                        {
+                            statusCode = "404";
+                            reasonPhrase = "Not Found";
+                            responseBody = "\nLog in as a user to show all acquired cards\n";
+                        }
 
-                    Arena arena = new Arena(user1, user2);
-                    arena.battle();
-
-                    statusCode = "200";
-                    reasonPhrase = "OK";
-                    responseBody = "\n"+ arena.battle() +"\n";
+                    }
+                    else
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nSession token is missing\n";
+                    }
                 }
                 else
                 {
