@@ -299,7 +299,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void DeleteTradeDeal()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -337,7 +336,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void GetTrades()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -374,7 +372,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public string GetElementTypeFromEnum(ElementType elementType)
         {
             if(elementType == ElementType.normal)

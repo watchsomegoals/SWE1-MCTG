@@ -12,6 +12,7 @@ namespace NUnitTest
     [TestFixture]
     class RequestContextTest
     {
+        
         [Test]
         [Category("pass")]
         [TestCase("POST /messages/1 HTTP/1.1\r\n" +
@@ -21,6 +22,7 @@ namespace NUnitTest
                   "CONTENT-LENGTH: 23\r\n" +
                   "CONTENT-TYPE: APPLICATION/X-WWW-FORM-URLENCODED\r\n\r\n" +
                   "the payload is here")]
+        
         public void ReadContextTestPost(string data)
         {
             //arrange
@@ -241,5 +243,6 @@ namespace NUnitTest
             //assert
             Assert.AreEqual(response, responseActual);
         }
+        
     }
 }
