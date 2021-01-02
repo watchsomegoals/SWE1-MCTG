@@ -158,10 +158,19 @@ namespace MCTG
                         {
                             string username = mycon.GetUserLoggedIn(headerData[key]);
                             Store store = JsonConvert.DeserializeObject<Store>(payload);
-                            mycon.InsertTradingDeal(store.Id, username, store.CardToTrade, store.Type, store.MinimumDamage);
-                            statusCode = "200";
-                            reasonPhrase = "OK";
-                            responseBody = "\n" + username + " put a card up for trade\n";
+                            if(mycon.CheckIfCardInDeck(store.CardToTrade, username))
+                            {
+                                statusCode = "400";
+                                reasonPhrase = "Bad Request";
+                                responseBody = "\nCannot trade card that is in deck\n";
+                            }
+                            else
+                            {
+                                mycon.InsertTradingDeal(store.Id, username, store.CardToTrade, store.Type, store.MinimumDamage);
+                                statusCode = "200";
+                                reasonPhrase = "OK";
+                                responseBody = "\n" + username + " put a card up for trade\n";
+                            }
                         }
                         else
                         {
@@ -285,6 +294,7 @@ namespace MCTG
                 }
             }
         }
+
 
         public void DeleteTradeDeal()
         {
