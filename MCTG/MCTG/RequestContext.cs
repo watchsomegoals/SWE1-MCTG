@@ -105,7 +105,6 @@ namespace MCTG
 
             }
         }
-
         public void HandleRequest()
         {
             statusCode = null;
@@ -260,7 +259,6 @@ namespace MCTG
                 }
             }
         }
-
         public void CreateDeal()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -344,7 +342,6 @@ namespace MCTG
             {
                 if (mycon.CheckLoggedIn(headerData[key]))
                 {
-                    string username = mycon.GetUserLoggedIn(headerData[key]);
                     if (mycon.CheckTradingDeals())
                     {
                         statusCode = "200";
@@ -540,7 +537,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public string GetTypeFromCardName(string cardname)
         {
             if(cardname.Contains("Spell"))
@@ -552,7 +548,6 @@ namespace MCTG
                 return "monster";
             }
         }
-
         public void ShowScoreboard()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -561,8 +556,6 @@ namespace MCTG
             {
                 if (mycon.CheckLoggedIn(headerData[key]))
                 {
-                    string username = mycon.GetUserLoggedIn(headerData[key]);
-
                     statusCode = "200";
                     reasonPhrase = "OK";
                     responseBody = "\n" + mycon.GetScoreboard() + "\n";
@@ -581,7 +574,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void ShowStats()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -610,7 +602,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void ShowData()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -637,7 +628,6 @@ namespace MCTG
                 responseBody = "\nNo active session under given username and token\n";
             }
         }
-
         public void EditData()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -657,7 +647,6 @@ namespace MCTG
                 responseBody = "\nNo active session under given username and token\n";
             }
         }
-
         public void ShowDeckDifferent()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -695,7 +684,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void ShowDeck()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -733,7 +721,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void ConfigureDeck()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -818,7 +805,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void ShowCards()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -847,7 +833,6 @@ namespace MCTG
                 responseBody = "\nSession token is missing\n";
             }
         }
-
         public void BuyingPackages()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -888,7 +873,6 @@ namespace MCTG
                 responseBody = "\nLog in as a user to purchase packages\n";
             }
         }
-
         public void CreatingPackages()
         {
             DatabaseManager mycon = new DatabaseManager();
@@ -928,7 +912,6 @@ namespace MCTG
                 responseBody = "\nPackage with id " + packageid + " created\n";
             }
         }
-
         public void LoggingUser()
         {
             User user = JsonConvert.DeserializeObject<User>(payload);
@@ -953,7 +936,6 @@ namespace MCTG
                 responseBody = "\nSuccessfully logged in\n";
             }
         }
-
         public void RegisteringUser()
         {
             User user = JsonConvert.DeserializeObject<User>(payload);
@@ -971,136 +953,6 @@ namespace MCTG
                 responseBody = "\nUser already exists\n";
             }
         }
-
-//-----------------------------------------------------------------------------------------------------------------------------
-
-        public void Delete()
-        {
-            string path = Path.Combine(Environment.CurrentDirectory, dirName);
-            if (Directory.Exists(path))
-            {
-                string filePath = Path.Combine(path, resourceID);
-                filePath += ".txt";
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                    statusCode = "200";
-                    reasonPhrase = "OK";
-                    responseBody = "\nFile deleted";
-                }
-                else
-                {
-                    statusCode = "404";
-                    reasonPhrase = "Not Found";
-                    responseBody = "\nNot Found, file does not exist";
-                }
-            }
-            else
-            {
-                statusCode = "404";
-                reasonPhrase = "Not Found";
-                responseBody = "\nNot Found, file does not exist";
-            }
-        }
-
-        public void Put()
-        {
-            string path = Path.Combine(Environment.CurrentDirectory, dirName);
-            if (Directory.Exists(path))
-            {
-                string filePath = Path.Combine(path, resourceID);
-                filePath += ".txt";
-                if (File.Exists(filePath))
-                {
-                    File.WriteAllText(filePath, payload);
-                    statusCode = "200";
-                    reasonPhrase = "OK";
-                    responseBody = "\nFile updated";
-                }
-                else
-                {
-                    statusCode = "404";
-                    reasonPhrase = "Not Found";
-                    responseBody = "\nNot Found, file does not exist";
-                }
-            }
-            else
-            {
-                statusCode = "404";
-                reasonPhrase = "Not Found";
-                responseBody = "\nNot Found, file does not exist";
-            }
-        }
-
-        public void GetByID()
-        {
-            string path = Path.Combine(Environment.CurrentDirectory, dirName);
-            if (Directory.Exists(path))
-            {
-                string filePath = Path.Combine(path, resourceID);
-                filePath += ".txt";
-                if (File.Exists(filePath))
-                {
-                    responseBody = null;
-                    responseBody += "\n";
-                    responseBody += Path.GetFileName(filePath);
-                    responseBody += "\n{";
-                    responseBody += File.ReadAllText(filePath);
-                    responseBody += "}\n";
-                    statusCode = "200";
-                    reasonPhrase = "OK";
-                }
-                else
-                {
-                    statusCode = "404";
-                    reasonPhrase = "Not Found";
-                    responseBody = "\nNot Found, file does not exist";
-                }
-            }
-            else
-            {
-                statusCode = "404";
-                reasonPhrase = "Not Found";
-                responseBody = "\nNot Found, file does not exist";
-            }
-        }
-
-        public void GetAll()
-        {
-            string path = Path.Combine(Environment.CurrentDirectory, dirName);
-            if (Directory.Exists(path))
-            {
-                DirectoryInfo messagesDir = new DirectoryInfo(path);
-                if (messagesDir.GetFiles("*.txt").Length > 0)
-                {
-                    string[] filePaths = Directory.GetFiles(path);
-                    responseBody = null;
-                    responseBody += "\n";
-                    for (int i = 0; i < filePaths.Length; i++)
-                    {
-                        responseBody += Path.GetFileName(filePaths[i]);
-                        responseBody += "\n{";
-                        responseBody += File.ReadAllText(filePaths[i]);
-                        responseBody += "}\n";
-                        statusCode = "200";
-                        reasonPhrase = "OK";
-                    }
-                }
-                else
-                {
-                    statusCode = "404";
-                    reasonPhrase = "Not Found";
-                    responseBody = "\nNot Found, files do not exist";
-                }
-            }
-            else
-            {
-                statusCode = "404";
-                reasonPhrase = "Not Found";
-                responseBody = "\nNot Found, files do not exist";
-            }
-        }
-
         public string ComposeResponse()
         {
             string response;
@@ -1114,49 +966,41 @@ namespace MCTG
             response += "\r\n\r\n";
             return response;
         }
-
         public string HttpVerb
         {
             get { return httpVerb; }
             set { httpVerb = value; }
         }
-
         public string DirName
         {
             get { return dirName; }
             set { dirName = value; }
         }
-
         public string ResourceID
         {
             get { return resourceID; }
             set { resourceID = value; }
         }
-
         public string Protocol
         {
             get { return protocol; }
             set { protocol = value; }
         }
-
         public string Payload
         {
             get { return payload; }
             set { payload = value; }
         }
-
         public string StatusCode
         {
             get { return statusCode; }
             set { statusCode = value; }
         }
-
         public string ReasonPhrase
         {
             get { return reasonPhrase; }
             set { reasonPhrase = value; }
         }
-
         public string ResponseBody
         {
             get { return responseBody; }

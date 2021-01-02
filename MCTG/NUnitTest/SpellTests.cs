@@ -1,4 +1,4 @@
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using MCTG;
 using Moq;
 using System;
@@ -9,31 +9,30 @@ using System.Threading.Tasks;
 
 namespace NUnitTest
 {
-    [TestFixture]
-    class MonsterTests
+    class SpellTests
     {
-        Monster monster;
+        Spell spell;
         double result;
         [Test]
         [Category("pass")]
-        public void DoubleDamageMonsterTest()
+        public void DoubleDamageSpellTest()
         {
             //arrange
-            monster = new Monster("1", "BlueEyes", 40.0, ElementType.normal, MonsterType.dragon);
+            spell = new Spell("1", "BlueEyes", 40.0, ElementType.normal);
             //act
-            result = monster.DoubleDamage();
+            result = spell.DoubleDamage();
             //assert
             Assert.AreEqual(80.0, result);
         }
-        
+
         [Test]
         [Category("pass")]
-        public void HalveDamageMonsterTest()
+        public void HalveDamageSpellTest()
         {
             //arrange
-            monster = new Monster("1", "BlueEyes", 40.0, ElementType.normal, MonsterType.dragon);
+            spell = new Spell("1", "BlueEyes", 40.0, ElementType.normal);
             //act
-            result = monster.HalveDamage();
+            result = spell.HalveDamage();
             //assert
             Assert.AreEqual(20.0, result);
         }
