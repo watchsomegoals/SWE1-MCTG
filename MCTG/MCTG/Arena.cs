@@ -24,6 +24,9 @@ namespace MCTG
                 battle(players[0], players[1]);
                 players.RemoveAt(1);
                 players.RemoveAt(0);
+                DatabaseManager mycon = new DatabaseManager();
+                mycon.ChangeScoreAndStatsIfLost(Arena.LoserUser);
+                mycon.ChangeScoreAndStatsIfWon(Arena.WinnerUser);
             }
         }
         public static void battle(User user1, User user2)
