@@ -90,6 +90,7 @@
   <ItemGroup>
     <Compile Include="Arena.cs" />
     <Compile Include="DatabaseManager.cs" />
+    <Compile Include="DatabaseManagerInterface.cs" />
     <Compile Include="ICard.cs" />
     <Compile Include="Monster.cs" />
     <Compile Include="MyTcpListener.cs" />

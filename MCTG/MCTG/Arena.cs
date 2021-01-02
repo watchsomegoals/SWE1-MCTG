@@ -31,10 +31,10 @@ namespace MCTG
         }
         public static void battle(User user1, User user2)
         {
-            double damage1 = 0;
-            double damage2 = 0;
+            double damage1;
+            double damage2;
             RequestContext req = new RequestContext();
-            string element = null;
+            string element;
             string card = null;
 
             while (rounds <= 100)

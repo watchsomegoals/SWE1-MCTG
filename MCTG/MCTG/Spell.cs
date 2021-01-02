@@ -13,7 +13,6 @@ namespace MCTG
         private double _damage;
         private ElementType _elementType;
         private CardType _cardType;
-        private bool _isDead;
         private MonsterType _monsterType;
 
         public Spell(string id, string name, double damage, ElementType elementType)
@@ -23,80 +22,10 @@ namespace MCTG
             _damage = damage;
             _elementType = elementType;
             _cardType = CardType.spell;
-            _isDead = false;
             _monsterType = MonsterType.def;
         }
         public double DoubleDamage() => 2 * Damage;
         public double HalveDamage() => Damage / 2;
-        public int Attack(ICard defender)
-        {
-            double damageValueAttacker = 0;
-            double damageValueDefender = defender.Damage;
-
-            if (defender.MonsterType == MonsterType.knight && ElementType == ElementType.water)
-            {
-                return 1;
-            }
-            else if (defender.MonsterType == MonsterType.kraken)
-            {
-                return 0;
-            }
-            else if (defender.ElementType == ElementType.fire)
-            {
-                if (ElementType == ElementType.fire)
-                {
-                    damageValueAttacker = Damage;
-                }
-                else if (ElementType == ElementType.water)
-                {
-                    damageValueAttacker = DoubleDamage();
-                }
-                else if (ElementType == ElementType.normal)
-                {
-                    damageValueAttacker = HalveDamage();
-                }
-            }
-            else if (defender.ElementType == ElementType.water)
-            {
-                if (ElementType == ElementType.fire)
-                {
-                    damageValueAttacker = HalveDamage();
-                }
-                else if (ElementType == ElementType.water)
-                {
-                    damageValueAttacker = Damage;
-                }
-                else if (ElementType == ElementType.normal)
-                {
-                    damageValueAttacker = DoubleDamage();
-                }
-            }
-            else if (defender.ElementType == ElementType.normal)
-            {
-                if (ElementType == ElementType.fire)
-                {
-                    damageValueAttacker = DoubleDamage();
-                }
-                else if (ElementType == ElementType.water)
-                {
-                    damageValueAttacker = HalveDamage();
-                }
-                else if (ElementType == ElementType.normal)
-                {
-                    damageValueAttacker = Damage;
-                }
-            }
-
-            if (damageValueAttacker > damageValueDefender)
-            {
-                return 1;
-            }
-            else
-            {
-                return -1;
-            }
-        }
-
         public string Id
         {
             get => _id;
@@ -121,11 +50,6 @@ namespace MCTG
         {
             get => _cardType;
             set => _cardType = value;
-        }
-        public bool IsDead
-        {
-            get => _isDead;
-            set => _isDead = value;
         }
         public MonsterType MonsterType
         {

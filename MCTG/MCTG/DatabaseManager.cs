@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace MCTG
 {
-    public class DatabaseManager
+    public class DatabaseManager : DatabaseManagerInterface
     {
         public bool InsertUser(string username, string password)
         {
@@ -314,7 +314,7 @@ namespace MCTG
         }
         public string ShowAllCards(string username)
         {
-            string cards = null;
+            string cards;
 
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -440,7 +440,7 @@ namespace MCTG
         }
         public string ShowDeckCards(string username)
         {
-            string cards = null;
+            string cards;
 
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -464,7 +464,7 @@ namespace MCTG
         }
         public string ShowDeckCardsDifferent(string username)
         {
-            string cards = null;
+            string cards;
 
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -555,7 +555,7 @@ namespace MCTG
         }
         public string GetUserData(string username)
         {
-            string data = null;
+            string data;
 
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -577,7 +577,7 @@ namespace MCTG
             conn.Close();
             return data;
         }
-        public int getElo(string username)
+        public int GetElo(string username)
         {
             int elo = 0;
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
@@ -597,7 +597,7 @@ namespace MCTG
             conn.Close();
             return elo;
         }
-        public int getWon(string username)
+        public int GetWon(string username)
         {
             int won = 0;
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
@@ -617,7 +617,7 @@ namespace MCTG
             conn.Close();
             return won;
         }
-        public int getLost(string username)
+        public int GetLost(string username)
         {
             int lost = 0;
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
@@ -639,9 +639,9 @@ namespace MCTG
         }
         public void ChangeScoreAndStatsIfWon(string username)
         {
-            int eloold = getElo(username);
-            int wonold = getWon(username);
-            int lost = getLost(username);
+            int eloold = GetElo(username);
+            int wonold = GetWon(username);
+            int lost = GetLost(username);
             int elonew = eloold + 5;
             int wonnew = wonold + 1;
             int played = wonnew + lost;
@@ -669,9 +669,9 @@ namespace MCTG
         }
         public void ChangeScoreAndStatsIfLost(string username)
         {
-            int eloold = getElo(username);
-            int won = getWon(username);
-            int lostold = getLost(username);
+            int eloold = GetElo(username);
+            int won = GetWon(username);
+            int lostold = GetLost(username);
             int elonew = eloold - 3;
             int lostnew = lostold + 1;
             int played = won + lostnew;
@@ -723,7 +723,7 @@ namespace MCTG
         }
         public string GetScoreboard()
         {
-            string board = null;
+            string board;
             int count = 1;
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -789,7 +789,7 @@ namespace MCTG
         }
         public string GetTradingDeals()
         {
-            string deals = null;
+            string deals;
             int count = 1;
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -851,7 +851,7 @@ namespace MCTG
         }
         public double GetMinDamageDeal(string dealid)
         {
-            double mindamage = 0;
+            double mindamage;
            
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -869,7 +869,7 @@ namespace MCTG
         }
         public double GetDamageCardFromCards(string cardid)
         {
-            double damage = 0;
+            double damage;
 
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
@@ -993,11 +993,11 @@ namespace MCTG
         public void FillDeckOfUser(User user)
         {
             RequestContext req = new RequestContext();
-            string id = null;
-            string name = null;
-            double damage = 0;
-            string elementType = null;
-            string monsterType = null;
+            string id;
+            string name;
+            double damage;
+            string elementType;
+            string monsterType;
 
             string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
             NpgsqlConnection conn = new NpgsqlConnection(connstring);
