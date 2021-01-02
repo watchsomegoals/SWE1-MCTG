@@ -150,41 +150,7 @@ namespace MCTG
                 }
                 else if (string.Compare(dirName, "tradings") == 0 && string.Compare(resourceID, null) == 0)
                 {
-                    DatabaseManager mycon = new DatabaseManager();
-                    string key = "Authorization";
-                    if (headerData.ContainsKey(key))
-                    {
-                        if (mycon.CheckLoggedIn(headerData[key]))
-                        {
-                            string username = mycon.GetUserLoggedIn(headerData[key]);
-                            Store store = JsonConvert.DeserializeObject<Store>(payload);
-                            if(mycon.CheckIfCardInDeck(store.CardToTrade, username))
-                            {
-                                statusCode = "400";
-                                reasonPhrase = "Bad Request";
-                                responseBody = "\nCannot trade card that is in deck\n";
-                            }
-                            else
-                            {
-                                mycon.InsertTradingDeal(store.Id, username, store.CardToTrade, store.Type, store.MinimumDamage);
-                                statusCode = "200";
-                                reasonPhrase = "OK";
-                                responseBody = "\n" + username + " put a card up for trade\n";
-                            }
-                        }
-                        else
-                        {
-                            statusCode = "404";
-                            reasonPhrase = "Not Found";
-                            responseBody = "\nLog in as a user to show all acquired cards\n";
-                        }
-                    }
-                    else
-                    {
-                        statusCode = "400";
-                        reasonPhrase = "Bad Request";
-                        responseBody = "\nSession token is missing\n";
-                    }
+                    CreateDeal();
                 }
                 else if (string.Compare(dirName, "battles") == 0)
                 {
@@ -295,6 +261,44 @@ namespace MCTG
             }
         }
 
+        public void CreateDeal()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+                    Store store = JsonConvert.DeserializeObject<Store>(payload);
+                    if (mycon.CheckIfCardInDeck(store.CardToTrade, username))
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nCannot trade card that is in deck\n";
+                    }
+                    else
+                    {
+                        mycon.InsertTradingDeal(store.Id, username, store.CardToTrade, store.Type, store.MinimumDamage);
+                        statusCode = "200";
+                        reasonPhrase = "OK";
+                        responseBody = "\n" + username + " put a card up for trade\n";
+                    }
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to show all acquired cards\n";
+                }
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
+            }
+        }
 
         public void DeleteTradeDeal()
         {
