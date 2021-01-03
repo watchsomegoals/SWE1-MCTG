@@ -272,6 +272,9 @@ echo.
 echo 22) try to create trading deal with card that is in deck
 curl -X POST http://localhost:10001/tradings --header "Content-Type: application/json" --header "Authorization: Basic kienboec-mtcgToken" -d "{\"Id\": \"77785277-4590-49d4-b0cf-ba0a921faad0\", \"CardToTrade\": \"b2237eca-0271-43bd-87f6-b22f70d42ca4\", \"Type\": \"monster\", \"MinimumDamage\": 15}"
 
+echo 23) sell 1 card for 1 coin if card is not in deck
+curl -X PUT http://localhost:10001/sell/9e8238a4-8a7a-487f-9f7d-a8c97899eb48 --header "Authorization: Basic kienboec-mtcgToken"
+
 REM --------------------------------------------------
 echo end...
 
