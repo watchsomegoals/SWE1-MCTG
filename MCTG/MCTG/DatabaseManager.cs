@@ -1020,5 +1020,31 @@ namespace MCTG
             }
 
         }
+        public void SellCardFromStack(string cardtosell, string username)
+        {
+            string connstring = "Host=localhost;Username=postgres;Password=password;Database=MCTGdb;Port=5432";
+            NpgsqlConnection conn = new NpgsqlConnection(connstring);
+            conn.Open();
+
+            string strdelete = "Delete from cards where cardid = @cardtosell and fk_username = @username";
+            NpgsqlCommand sqldelete = new NpgsqlCommand(strdelete, conn);
+
+            sqldelete.Parameters.AddWithValue("cardtosell", cardtosell);
+            sqldelete.Parameters.AddWithValue("username", username);
+            sqldelete.Prepare();
+            sqldelete.ExecuteNonQuery();
+
+            int coinsold = GetCoinsFromUser(username);
+            int coinsnew = coinsold + 1;
+
+            string strupdate = "Update users set coins = @newcoins where username = @username";
+            NpgsqlCommand sqlupdate = new NpgsqlCommand(strupdate, conn);
+            sqlupdate.Parameters.AddWithValue("newcoins", coinsnew);
+            sqlupdate.Parameters.AddWithValue("username", username);
+            sqlupdate.Prepare();
+            sqlupdate.ExecuteNonQuery();
+
+            conn.Close();
+        }
     }
 }
