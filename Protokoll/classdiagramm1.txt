@@ -1,0 +1,93 @@
+@startuml
+
+interface ICard {
+    CardType: enum
+    Damage: double
+    ElementType: enum
+    Id: string
+    MonsterType: enum
+    Name: string
+    DoubleDamage(): void
+    HalveDamage(): void
+}
+
+class Monster implements ICard{
+    -cardType: enum
+    -damage: double
+    -elementType: enum
+    -id: string
+    -monsterType: enum
+    -name: string
+    +<<Create>> Monster()
+    +CardType: enum
+    +Damage: double
+    +ElementType: enum
+    +Id: string
+    +MonsterType: enum
+    +Name: string
+    +DoubleDamage(): void
+    +HalveDamage(): void
+    
+}
+
+class Spell implements ICard{
+    -cardType: enum
+    -damage: double
+    -elementType: enum
+    -id: string
+    -monsterType: enum
+    -name: string
+    +<<Create>> Spell()
+    +CardType: enum
+    +Damage: double
+    +ElementType: enum
+    +Id: string
+    +MonsterType: enum
+    +Name: string
+    +DoubleDamage(): void
+    +HalveDamage(): void
+}
+
+class User {
+    -username: string
+    -password: string
+    -deck: List<ICard>
+    -name: string
+    -image: string
+    +<<Create>> User()
+    +Bio: string
+    +Deck: List<ICard>
+    +Image: string
+    +Name: string
+    +Password: string
+    +Username: string
+    +AddCardToDeckOfUser(): void
+    +ShuffleDeck(): void
+}
+
+class Arena {
+    +{static} players: List<User>
+    +{static} winneruser: string
+    +{static} loseruser: string
+    +{static} rounds: int
+    +{static} log: string
+    +{static} Restart: ManualResetEvent
+    +{static} PrepareFight(User user): void
+    +{static} battle(User user1, User user2): void
+}
+
+class Store {
+    -id: string
+    -cardtotrade: string
+    -type: string
+    -minimumdamage: string
+    +Id: string
+    +CardToTrade: string
+    +Type: string
+    +MinimumDamage: double
+    +<<Create>> Store()
+}
+
+
+
+@enduml

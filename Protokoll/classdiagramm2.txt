@@ -1,0 +1,68 @@
+@startuml
+
+interface DatabaseManagerInterface {
+    InsertUser(): void
+}
+
+class DatabaseManager implements DatabaseManagerInterface{
+    +InsertUser(): void
+    +CheckIfCardInDeck(): bool
+    +GetCardIdFromDeal(): string
+    +ExecuteTransaction(): void
+    +GetCoinsFromUser(): int
+    +GetElo(): int
+    +GetUserData(): string
+    +DeleteTradingDeal(): void
+}
+
+class MyTcpListener {
+    +{static}Main(): void
+}
+
+class ClientHandler {
+    +client: TcpClient
+    +startClient(TcpClient client): void
+    +exchangeMessages(): void
+}
+
+class RequestContext {
+    -dirName: string
+    -headerData: IDictionary<string, string>
+    -httpVerb: string
+    -payload: string
+    -protocol: string
+    -reasonPhrase: string
+    -resourceID: string
+    -responseBody: string
+    -statusCode: string
+    +BuyingPackages(): void
+    +ComposeResponse(): void
+    +ConfigureDeck(): void
+    +CreateDeal(): void
+    +EditData(): void
+}
+
+enum CardType {
+    MONSTER
+    SPELL
+}
+
+enum ElementType {
+    FIRE
+    WATER
+    NORMAL
+}
+
+enum MonsterType {
+    DEF
+    DRAGON
+    ELF
+    GOBLIN
+    ORK
+    WIZARD
+    KNIGHT
+    KRAKEN
+}
+
+
+@enduml

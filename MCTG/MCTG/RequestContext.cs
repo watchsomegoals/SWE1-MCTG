@@ -240,41 +240,7 @@ namespace MCTG
                 }
                 else if(string.Compare(dirName, "sell") == 0 && string.Compare(resourceID, null) != 0)
                 {
-                    DatabaseManager mycon = new DatabaseManager();
-                    string key = "Authorization";
-                    if (headerData.ContainsKey(key))
-                    {
-                        if (mycon.CheckLoggedIn(headerData[key]))
-                        {
-                            string username = mycon.GetUserLoggedIn(headerData[key]);
-                            string cardtosell = resourceID;
-                            if (mycon.CheckIfCardInDeck(cardtosell, username))
-                            {
-                                statusCode = "400";
-                                reasonPhrase = "Bad Request";
-                                responseBody = "\nCannot sell card that is in deck\n";
-                            }
-                            else
-                            {
-                                mycon.SellCardFromStack(cardtosell, username);
-                                statusCode = "200";
-                                reasonPhrase = "OK";
-                                responseBody = "\n" + username + " sold a card\n";
-                            }
-                        }
-                        else
-                        {
-                            statusCode = "404";
-                            reasonPhrase = "Not Found";
-                            responseBody = "\nLog in as a user to show all acquired cards\n";
-                        }
-                    }
-                    else
-                    {
-                        statusCode = "400";
-                        reasonPhrase = "Bad Request";
-                        responseBody = "\nSession token is missing\n";
-                    }
+                    SellCard();
                 }
                 else
                 {
@@ -295,6 +261,45 @@ namespace MCTG
                     reasonPhrase = "Not Found";
                     responseBody = "\nNot Found, wrong ressource name\n";
                 }
+            }
+        }
+
+        public void SellCard()
+        {
+            DatabaseManager mycon = new DatabaseManager();
+            string key = "Authorization";
+            if (headerData.ContainsKey(key))
+            {
+                if (mycon.CheckLoggedIn(headerData[key]))
+                {
+                    string username = mycon.GetUserLoggedIn(headerData[key]);
+                    string cardtosell = resourceID;
+                    if (mycon.CheckIfCardInDeck(cardtosell, username))
+                    {
+                        statusCode = "400";
+                        reasonPhrase = "Bad Request";
+                        responseBody = "\nCannot sell card that is in deck\n";
+                    }
+                    else
+                    {
+                        mycon.SellCardFromStack(cardtosell, username);
+                        statusCode = "200";
+                        reasonPhrase = "OK";
+                        responseBody = "\n" + username + " sold a card\n";
+                    }
+                }
+                else
+                {
+                    statusCode = "404";
+                    reasonPhrase = "Not Found";
+                    responseBody = "\nLog in as a user to show all acquired cards\n";
+                }
+            }
+            else
+            {
+                statusCode = "400";
+                reasonPhrase = "Bad Request";
+                responseBody = "\nSession token is missing\n";
             }
         }
         public void CreateDeal()
