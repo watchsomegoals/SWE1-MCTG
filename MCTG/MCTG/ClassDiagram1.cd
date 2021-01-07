@@ -54,7 +54,7 @@
   <Class Name="MCTG.DatabaseManager">
     <Position X="13.25" Y="0.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AKAAKQAFIAIoQCABNgAAAMEAFMAAEGAgISIIACAFAkA=</HashCode>
+      <HashCode>AKAAKQAFIAIoQCABNgAAAMEAFMAAEGAgISIIICAFAkA=</HashCode>
       <FileName>DatabaseManager.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -71,6 +71,13 @@
     <TypeIdentifier>
       <HashCode>AAACBACAAABAAAAAAAQAEAQAAAgAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>ICard.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MCTG.DatabaseManagerInterface">
+    <Position X="16" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>DatabaseManagerInterface.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Enum Name="CardType">
